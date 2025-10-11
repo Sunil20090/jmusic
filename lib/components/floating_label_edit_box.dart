@@ -10,6 +10,7 @@ class FloatingLabelEditBox extends StatefulWidget {
   final bool hideText;
   final TextInputType? textInputType;
   final Widget? prefix;
+  final Function(String value)? onChanged;
   FloatingLabelEditBox(
       {super.key,
       this.controller,
@@ -19,6 +20,7 @@ class FloatingLabelEditBox extends StatefulWidget {
       this.hint,
       this.prefix,
       this.inputFormatters,
+      this.onChanged,
       this.textInputType});
 
   @override
@@ -34,6 +36,7 @@ class _FloatingLabelEditBoxState extends State<FloatingLabelEditBox> {
       obscureText: widget.hideText,
       keyboardType: widget.textInputType,
       inputFormatters: widget.inputFormatters,
+      onChanged: widget.onChanged,
       
       decoration: InputDecoration(
         

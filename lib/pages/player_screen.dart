@@ -15,6 +15,7 @@ class PlayerScreen extends StatefulWidget {
 
 class _PlayerScreenState extends State<PlayerScreen> {
   
+  late AudioPlayer _player;
 
   @override
   void initState() {
@@ -24,15 +25,17 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   _initPlayer() async {  
 
+    _player = AudioPlayer();
+
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration.music());
 
     
 
     try {
-      await player!.setUrl(widget.music['song_url']);
+      await _player.setUrl(widget.music['song_url']);
 
-      await player?.play();
+      await _player.play();
 
       setState(() {});
     } catch (e) {
@@ -43,7 +46,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   void dispose() {
     super.dispose();
-    player?.dispose();
+    _player.dispose();
   }
 
   @override
@@ -77,16 +80,16 @@ class _PlayerScreenState extends State<PlayerScreen> {
               Column(
                 children: [
                   StreamBuilder<Duration?>(
-                    stream: player?.durationStream,
+                    stream: _player.durationStream,
                     builder: (context, snapshot) {
                       final duration = snapshot.data;
                       return StreamBuilder<Duration>(
-                        stream: player?.positionStream,
+                        stream: _player.positionStream,
                         builder: (context, snapshot) {
                           final position = snapshot.data;
 
                           return StreamBuilder<Duration?>(
-                            stream: player?.bufferedPositionStream,
+                            stream: _player.bufferedPositionStream,
                             builder: (context, snapshot) {
                               final bufferedPosition = snapshot.data;
                               if (position == null ||
@@ -121,7 +124,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                               position.inSeconds /
                                               duration.inSeconds,
                                           onChanged: (value) {
-                                            player?.seek(
+                                            _player.seek(
                                               Duration(
                                                 seconds:
                                                     (duration.inSeconds * value)
@@ -174,13 +177,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       ),
                       addHorizontalSpace(),
                       StreamBuilder<PlayerState>(
-                        stream: player?.playerStateStream,
+                        stream: _player.playerStateStream,
                         builder: (context, snapshot) {
                           final playerState = snapshot.data;
                           final playing = playerState?.playing;
 
                           final processingState = playerState?.processingState;
-                          print(playing);
+                          
                           if (processingState == ProcessingState.loading ||
                               processingState == ProcessingState.buffering) {
                             return CircularProgressIndicator();
@@ -188,7 +191,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             return IconButton(
                               iconSize: 64,
                               onPressed: () {
-                                player?.play();
+                                _player.play();
                               },
                               icon: Icon(Icons.play_arrow),
                             );
@@ -197,8 +200,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             return IconButton(
                               iconSize: 64,
                               onPressed: () async {
-                                await player?.seek(Duration.zero);
-                                await player?.play();
+                                await _player.seek(Duration.zero);
+                                await _player.play();
                               },
                               icon: Icon(
                                 Icons.replay_circle_filled,
@@ -209,7 +212,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             return IconButton(
                               iconSize: 64,
                               onPressed: () {
-                                player?.pause();
+                                _player.pause();
                               },
                               icon: Icon(Icons.pause_circle),
                             );

@@ -4,7 +4,6 @@ import 'package:jmusic/components/colored_button.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:jmusic/pages/handler/music_audio_handler.dart';
 import 'package:just_audio/just_audio.dart';
 
 const double DEFAULT_SPACE = 12;
@@ -131,5 +130,3 @@ String formatDurationInMinutes(Duration duration) {
   return '$minutes:$seconds';
 }
 
-AudioPlayer? player;
-MusicAudioHandler? audioHandler;
