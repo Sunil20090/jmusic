@@ -1,0 +1,1 @@
+const STORAGE_KEY_USER = 'user_key';

@@ -1,0 +1,147 @@
+use Sunil20090$gov;
+
+select * from users;
+select * from problems;
+select * from comments;
+select * from images_of_problems;
+select * from profiles_of_users;
+select * from likes_of_comments;
+select * from requirements_of_problems;
+select * from notifications_for_comments;
+
+
+delete from search_queries; 
+delete from screen_report;
+delete from tracking_of_problems;
+delete from notifications_for_problems_tracking; 
+delete from requirements_of_problems;
+delete from likes_of_comments; 
+delete from notifications_for_comments; 
+delete from profiles_of_users;
+delete from images_of_problems;
+delete from comments;
+delete from problems;
+
+
+
+alter table users auto_increment = 1;
+alter table problems auto_increment = 1; 
+alter table profiles_of_users auto_increment = 1;
+alter table likes_of_comments auto_increment = 1;
+alter table comments auto_increment = 1; 
+alter table notifications_for_comments auto_increment = 1;
+alter table users auto_increment = 1;
+alter table search_queries auto_increment = 1;
+alter table screen_report auto_increment = 1;
+alter table tracking_of_problems auto_increment = 1;
+alter table notifications_for_problems_tracking auto_increment = 1;
+
+flutter run -d chrome --web-browser-flag "--disable-web-security" --web-browser-flag "--user-data-dir=/tmp/flutter_cors"
+
+
+CREATE TABLE notifications_for_problems_tracking(
+    id int PRIMARY KEY auto_increment,
+    problem_id int,
+    tracked_by int,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (problem_id) references problems(id),
+    FOREIGN KEY (tracked_by) references users(id)
+);
+
+CREATE TABLE tracking_of_problems(
+    id int PRIMARY KEY auto_increment,
+    problem_id int,
+    tracked_by int,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (problem_id) references problems(id),
+    FOREIGN KEY (tracked_by) references users(id)
+);
+
+CREATE TABLE search_queries(
+    id int PRIMARY KEY auto_increment,
+    content text,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE screen_report(
+    id int PRIMARY KEY auto_increment,
+    user_id int,
+    reference_id int,
+    screen varchar(50),
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) references users(id)
+);
+
+
+CREATE TABLE notifications_for_problems_tracking(
+    id int PRIMARY KEY auto_increment,
+    problem_id int,
+    tracked_by int,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (problem_id) references problems(id),
+    FOREIGN KEY (tracked_by) references users(id)
+);
+
+CREATE TABLE skill_requirement_master(
+    id int PRIMARY KEY auto_increment,
+    content text,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE applications_for_problem(
+    id int PRIMARY KEY auto_increment,
+    applied_by int,
+    problem_id int,
+    FOREIGN KEY (problem_id) references problems(id),
+    FOREIGN KEY (applied_by) references users(id),
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE skills_of_users(
+    id int PRIMARY KEY auto_increment,
+    skill_id int,
+    user_id int,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (skill_id) references skill_requirement_master(id),
+    FOREIGN KEY (user_id) references users(id)
+);
+
+
+
+CREATE TABLE employees_of_problems(
+    id int PRIMARY KEY auto_increment,
+    requirement_id int,
+    user_id int,
+    problem_id int,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (requirement_id) references requirements_of_problems(id),
+    FOREIGN KEY (user_id) references users(id),
+    FOREIGN KEY (problem_id) references problems(id)
+);
+
+
+ Tables_in_Sunil20090$gov            |
++-------------------------------------+
+| applications_for_problem            |
+| comments                            |
+| election_choices                    |
+| election_forms                      |
+| election_nominations                |
+| election_users                      |
+| election_votings                    |
+| images_of_problems                  |
+| likes_of_comments                   |
+| notifications_for_comments          |
+| notifications_for_problems_tracking |
+| otp_codes                           |
+| problems                            |
+| profiles_of_users                   |
+| requirements_of_problems            |
+| screen_report                       |
+| search_queries                      |
+| skill_requirement_master            |
+| skills_of_users                     |
+| tracking_of_problems                |
+| users                               |
+| employees_of_problems               |     
