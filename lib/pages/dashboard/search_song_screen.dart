@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jmusic/components/floating_label_edit_box.dart';
 import 'package:jmusic/constants/local_constant.dart';
-import 'package:jmusic/constants/sound_constant.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/constants/url_constant.dart';
 import 'package:jmusic/utils/api_service.dart';
 import 'package:jmusic/utils/common_function.dart';
+import 'package:jmusic/utils/user/user_service.dart';
 
 class SearchSongScreen extends StatefulWidget {
   const SearchSongScreen({super.key});
@@ -18,7 +18,7 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
 
   var _filteredItems = [];
   var isCalling = false;
-  var _lastQuery = "";
+  var _lastQuery = null;
   TextEditingController _searchController = TextEditingController();
 
   @override
@@ -72,12 +72,11 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
       _filterList();
     });
 
-    var body = {"query": query};
+    var body = {"query": query, 'userId' : await getUserId()};
     _lastQuery = query;
     postService(URL_SONG_QUERY, body).then((response) {
       if (response.isSuccess) {
         setState(() {
-          print('get query list ${response.body}');
           _filteredItems = response.body;
         });
       }

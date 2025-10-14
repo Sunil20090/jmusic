@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class RoundedRectImage extends StatefulWidget {
   final double width, height;
-  final String thumbnail_url;
+  final String? thumbnail_url;
   final String? image_url;
   String offlineImageSrc;
   RoundedRectImage({
@@ -12,7 +12,7 @@ class RoundedRectImage extends StatefulWidget {
     this.width = 80,
     this.height = 50,
     this.image_url,
-    required this.thumbnail_url,
+    this.thumbnail_url,
     this.offlineImageSrc = PLACEHOLDER_IMAGE_MUSIC
   });
   @override
@@ -33,17 +33,19 @@ class _RoundedRectImageState extends State<RoundedRectImage> {
         child: SizedBox(
           width: widget.width,
           height: widget.height,
-          child: (widget.image_url != null)
+          child: (widget.image_url != null && widget.thumbnail_url != null)
               ? FadeInImage(
-                  placeholder: Image.network(widget.thumbnail_url).image,
+                  placeholder: Image.network(widget.thumbnail_url!).image,
                   image: Image.network(widget.image_url!).image,
                   fit: BoxFit.cover,
                 )
-              : FadeInImage(
+              : (widget.thumbnail_url != null) 
+              ? FadeInImage(
                   placeholder: Image.asset(widget.offlineImageSrc).image,
-                  image: Image.network(widget.thumbnail_url).image,
+                  image: Image.network(widget.thumbnail_url!).image,
                   fit: BoxFit.cover,
-                ),
+                )
+                : Image.asset(widget.offlineImageSrc, fit: BoxFit.cover,),
         ),
       ),
     );

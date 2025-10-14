@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jmusic/pages/dashboard/song_list.dart';
+import 'package:jmusic/pages/splash_screen.dart';
 void main() async {
   
   runApp(MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: SongList(),
+      home: SplashScreen(),
       
     );
   }

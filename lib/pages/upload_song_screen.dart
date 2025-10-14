@@ -2,12 +2,10 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:jmusic/components/choise_button.dart';
 import 'package:jmusic/components/colored_button.dart';
 import 'package:jmusic/components/floating_label_edit_box.dart';
 import 'package:jmusic/components/progress_circular.dart';
 import 'package:jmusic/components/round_it.dart';
-import 'package:jmusic/constants/sound_constant.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/constants/url_constant.dart';
 import 'package:jmusic/utils/api_service.dart';
@@ -22,10 +20,11 @@ class UploadSongScreen extends StatefulWidget {
 
 class _UploadSongScreenState extends State<UploadSongScreen> {
 
-  File? _file;
+  File? _musicFile;
   bool _uploadingFile = false;
   TextEditingController _nameCotroller = TextEditingController();
   TextEditingController _artistCotroller = TextEditingController();
+  TextEditingController _albumController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +39,11 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
               addVerticalSpace(),
               FloatingLabelEditBox(labelText: 'Artist names', controller: _artistCotroller,),
               addVerticalSpace(),
+                FloatingLabelEditBox(
+                labelText: 'Album',
+                controller: _albumController,
+              ),
+              addVerticalSpace(),
       
               RoundIt(
                 child: ColoredButton(
@@ -48,12 +52,24 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
                   },
                   child: Text('Choose File', style: getTextTheme(color: COLOR_WHITE).titleMedium,))
               ),
+
+              addVerticalSpace(),
+               RoundIt(
+                child: ColoredButton(
+                  onPressed: () {
+                    chooseMusicFile();
+                  },
+                  child: Text(
+                    'Choose Image File',
+                    style: getTextTheme(color: COLOR_WHITE).titleMedium,
+                  ),
+                ),
+              ),
       
               addVerticalSpace(DEFAULT_LARGE_SPACE),
               ColoredButton(
                 onPressed: !(_uploadingFile) ? (){
                   uploadSong();
-      
                 } : null,
                 child: (!_uploadingFile) ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -70,6 +86,13 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
     );
   }
 
+
+  chooseImageFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+  }
+
   chooseMusicFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -78,19 +101,20 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
     );
 
     if(result != null){
-      _file = File(result.files.single.path!);
+      _musicFile = File(result.files.single.path!);
 
     }
   }
   
   void uploadSong() async  {
-    if(_file != null){
+    if(_musicFile != null){
 
-      String base64 = await fileToBase64(_file!);
+      String base64 = await fileToBase64(_musicFile!);
 
       var body = {
         "name" : _nameCotroller.text,
         "artist" : _artistCotroller.text,
+        "album" : _albumController.text,
         "base64" : base64
       };
 

@@ -6,15 +6,16 @@ import 'package:jmusic/utils/common_function.dart';
 import 'package:just_audio/just_audio.dart';
 
 class PlayerScreen extends StatefulWidget {
-  dynamic music;
-  PlayerScreen({super.key, required this.music});
+  String? thumbnailUrl;
+  String songUrl, title;
+
+  PlayerScreen({super.key, required this.title, required this.songUrl, this.thumbnailUrl});
 
   @override
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  
   late AudioPlayer _player;
 
   @override
@@ -23,23 +24,20 @@ class _PlayerScreenState extends State<PlayerScreen> {
     _initPlayer();
   }
 
-  _initPlayer() async {  
-
+  _initPlayer() async {
     _player = AudioPlayer();
 
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration.music());
 
-    
-
     try {
-      await _player.setUrl(widget.music['song_url']);
+      await _player.setUrl(widget.songUrl);
 
       await _player.play();
 
       setState(() {});
     } catch (e) {
-      print("error : $e");
+      // print("error : $e");
     }
   }
 
@@ -59,21 +57,18 @@ class _PlayerScreenState extends State<PlayerScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: Hero(
-                  tag: widget.music['image_url'],
-                  child: Card(
-                    elevation: 8,
-                    child: RoundedRectImage(
-                      width: double.infinity,
-                      height: 300,
-                      thumbnail_url: widget.music['image_url'],
-                    ),
+                child: Card(
+                  elevation: 8,
+                  child: RoundedRectImage(
+                    width: double.infinity,
+                    height: 300,
+                    thumbnail_url: widget.thumbnailUrl,
                   ),
                 ),
               ),
 
               Text(
-                widget.music['title'],
+                widget.title,
                 style: getTextTheme(color: COLOR_PRIMARY).headlineMedium,
               ),
               addVerticalSpace(),
@@ -103,11 +98,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                       children: [
                                         addHorizontalSpace(20),
                                         Text(
-                                          formatDurationInMinutes(position!),
+                                          formatDurationInMinutes(position),
                                         ),
                                         Spacer(),
                                         Text(
-                                          formatDurationInMinutes(duration!),
+                                          formatDurationInMinutes(duration),
                                         ),
                                         addHorizontalSpace(20),
                                       ],
@@ -115,6 +110,28 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
                                     Stack(
                                       children: [
+                                        
+                                        SliderTheme(
+                                          data: SliderTheme.of(context)
+                                              .copyWith(
+                                                thumbShape: SliderComponentShape
+                                                    .noThumb,
+                                                activeTrackColor:
+                                                    COLOR_SECONDARY,
+                                                inactiveTrackColor:
+                                                    COLOR_SECONDARY,
+                                              ),
+                                          child: Slider(
+                                            min: 0.0,
+                                            max: 1.0,
+                                            secondaryActiveColor: COLOR_PRIMARY,
+                                            activeColor: COLOR_SECONDARY,
+                                            value:
+                                                bufferedPosition.inSeconds /
+                                                duration.inSeconds,
+                                            onChanged: null,
+                                          ),
+                                        ),
                                         Slider(
                                           min: 0.0,
                                           max: 1.0,
@@ -132,28 +149,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                               ),
                                             );
                                           },
-                                        ),
-                                        SliderTheme(
-                                          data: SliderTheme.of(context)
-                                              .copyWith(
-                                                thumbShape: SliderComponentShape
-                                                    .noThumb,
-
-                                                activeTrackColor:
-                                                    COLOR_SECONDARY,
-                                                inactiveTrackColor:
-                                                    COLOR_SECONDARY,
-                                              ),
-                                          child: Slider(
-                                            min: 0.0,
-                                            max: 1.0,
-                                            secondaryActiveColor: COLOR_PRIMARY,
-                                            activeColor: COLOR_SECONDARY,
-                                            value:
-                                                bufferedPosition!.inSeconds /
-                                                duration.inSeconds,
-                                            onChanged: null,
-                                          ),
                                         ),
                                       ],
                                     ),
@@ -183,7 +178,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           final playing = playerState?.playing;
 
                           final processingState = playerState?.processingState;
-                          
+
                           if (processingState == ProcessingState.loading ||
                               processingState == ProcessingState.buffering) {
                             return CircularProgressIndicator();

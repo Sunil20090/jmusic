@@ -4,8 +4,9 @@ import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/utils/common_function.dart';
 
 class SongCard extends StatelessWidget {
-  String title, imageUrl;
-   SongCard({super.key, required this.title, required this.imageUrl});
+  String title;
+  String? imageUrl;
+  SongCard({super.key, required this.title, this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +20,8 @@ class SongCard extends StatelessWidget {
             child: RoundedRectImage(
               width: 160,
               height: 160,
-              thumbnail_url: imageUrl),
-        
+              thumbnail_url: imageUrl,
+            ),
           ),
         ),
         addVerticalSpace(2),
@@ -34,7 +35,7 @@ class SongCard extends StatelessWidget {
               style: getTextTheme().bodyMedium,
             ),
           ],
-        )
+        ),
       ],
     );
   }

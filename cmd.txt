@@ -121,7 +121,27 @@ CREATE TABLE employees_of_problems(
 );
 
 
- Tables_in_Sunil20090$gov            |
+CREATE TABLE jmusic_users(
+    id int PRIMARY KEY auto_increment,
+    name varchar(100),
+    type varchar(100),
+    is_active BOOLEAN,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE jmusic_songs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    artist VARCHAR(255),
+    album VARCHAR(255),
+    genre VARCHAR(100),
+    duration_seconds INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
++-------------------------------------+
+| Tables_in_Sunil20090$gov            |
 +-------------------------------------+
 | applications_for_problem            |
 | comments                            |
@@ -145,3 +165,5 @@ CREATE TABLE employees_of_problems(
 | tracking_of_problems                |
 | users                               |
 | employees_of_problems               |     
++-------------------------------------+
+

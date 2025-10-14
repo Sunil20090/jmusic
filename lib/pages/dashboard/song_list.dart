@@ -28,9 +28,29 @@ class _SongListState extends State<SongList> {
     ApiResponse response = await postService(URL_SONG_LIST, {});
     if (response.isSuccess) {
       setState(() {
-        _songMasterList = response.body;
+        print(groupByAlbum(response.body));
+        _songMasterList = groupByAlbum(response.body);
       });
     }
+  }
+
+  groupByAlbum(List<dynamic> song_list) {
+    int counter = 0;
+
+    var master_list = [];
+    for (var song in song_list) {
+      var foundIndex = master_list.any((element) => element['album'] == song['album'],
+      );
+      if (!foundIndex) {
+        master_list.add({'album': song['album']});
+        master_list[master_list.length - 1]['songs'] = song_list.where(
+          (element) => element['album'] == song['album'],
+        ).toList();
+        counter++;
+      }
+    }
+
+    return master_list;
   }
 
   @override
@@ -51,14 +71,13 @@ class _SongListState extends State<SongList> {
                   ),
                   IconButton(
                     color: COLOR_PRIMARY,
-                    onPressed: 
-                    (){
+                    onPressed: () {
                       openSearhSongScreen();
-                    }, 
-                  icon: Icon(Icons.search, size: 32,))
+                    },
+                    icon: Icon(Icons.search, size: 32),
+                  ),
                 ],
               ),
-      
               Expanded(
                 child: ListView.builder(
                   itemCount: _songMasterList.length,
@@ -73,13 +92,13 @@ class _SongListState extends State<SongList> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Text(
-                              _songMasterList[index]['heading'],
-                              style: getTextTheme(color: COLOR_GREY).titleSmall,
+                              _songMasterList[index]['album'],
+                              style: getTextTheme(color: COLOR_GREY).titleLarge,
                             ),
                           ),
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-      
+
                             child: Row(
                               spacing: 14,
                               children: songList.map((elem) {
@@ -87,18 +106,10 @@ class _SongListState extends State<SongList> {
                                   onTap: () {
                                     openPlayerScreen(elem);
                                   },
-                                  child: Hero(
-                                    tag: elem['image_url'],
-                                    child: SongCard(
-                                      title: elem['title'],
-                                      imageUrl: elem['image_url'],
-                                    ),
-                                  ),
+                                  child: SongCard(title: elem['title'])
                                 );
                               }).toList(),
                             ),
-      
-                           
                           ),
                         ],
                       ),
@@ -109,9 +120,12 @@ class _SongListState extends State<SongList> {
             ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(onPressed: (){
-          openUploadSongScreen();
-        }, child: Icon(Icons.add),),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            openUploadSongScreen();
+          },
+          child: Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -119,15 +133,21 @@ class _SongListState extends State<SongList> {
   void openPlayerScreen(elem) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (builder) => PlayerScreen(music: elem)),
+      MaterialPageRoute(builder: (builder) => PlayerScreen(songUrl: elem['song_url'], title: elem['title'],)),
     );
   }
-  
+
   void openUploadSongScreen() {
-    Navigator.push(context, MaterialPageRoute(builder: (builder)=>UploadSongScreen()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (builder) => UploadSongScreen()),
+    );
   }
-  
+
   void openSearhSongScreen() {
-    Navigator.push(context, MaterialPageRoute(builder: (builder) => SearchSongScreen()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (builder) => SearchSongScreen()),
+    );
   }
 }
