@@ -32,7 +32,7 @@ class SongCard extends StatelessWidget {
               title,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
-              style: getTextTheme().bodyMedium,
+              style: getTextTheme().titleMedium,
             ),
           ],
         ),

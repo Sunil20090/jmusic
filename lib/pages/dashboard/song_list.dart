@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jmusic/components/custom/song_card.dart';
+import 'package:jmusic/components/progress_circular.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/constants/url_constant.dart';
 import 'package:jmusic/pages/dashboard/search_song_screen.dart';
@@ -17,6 +18,9 @@ class SongList extends StatefulWidget {
 
 class _SongListState extends State<SongList> {
   var _songMasterList = [];
+
+  bool fetchingSongs = false;
+
   @override
   void initState() {
     super.initState();
@@ -25,7 +29,14 @@ class _SongListState extends State<SongList> {
   }
 
   void initSongList() async {
+    setState(() {
+      fetchingSongs = true;
+    });
     ApiResponse response = await postService(URL_SONG_LIST, {});
+
+    setState(() {
+      fetchingSongs = false;
+    });
     if (response.isSuccess) {
       setState(() {
         print(groupByAlbum(response.body));
@@ -39,13 +50,14 @@ class _SongListState extends State<SongList> {
 
     var master_list = [];
     for (var song in song_list) {
-      var foundIndex = master_list.any((element) => element['album'] == song['album'],
+      var foundIndex = master_list.any(
+        (element) => element['album'] == song['album'],
       );
       if (!foundIndex) {
         master_list.add({'album': song['album']});
-        master_list[master_list.length - 1]['songs'] = song_list.where(
-          (element) => element['album'] == song['album'],
-        ).toList();
+        master_list[master_list.length - 1]['songs'] = song_list
+            .where((element) => element['album'] == song['album'])
+            .toList();
         counter++;
       }
     }
@@ -59,66 +71,80 @@ class _SongListState extends State<SongList> {
       child: Scaffold(
         body: Container(
           padding: SCREEN_PADDING,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Songs',
-                    style: getTextTheme(color: COLOR_PRIMARY).headlineLarge,
-                  ),
-                  IconButton(
-                    color: COLOR_PRIMARY,
-                    onPressed: () {
-                      openSearhSongScreen();
-                    },
-                    icon: Icon(Icons.search, size: 32),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _songMasterList.length,
-                  itemBuilder: (context, index) {
-                    var songList = [];
-                    songList = _songMasterList[index]['songs'];
-                    return Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          addVerticalSpace(DEFAULT_LARGE_SPACE),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(
-                              _songMasterList[index]['album'],
-                              style: getTextTheme(color: COLOR_GREY).titleLarge,
-                            ),
-                          ),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
+          child: (!fetchingSongs)
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Songs',
+                          style: getTextTheme(
+                            color: COLOR_PRIMARY,
+                          ).headlineLarge,
+                        ),
+                        IconButton(
+                          color: COLOR_PRIMARY,
+                          onPressed: () {
+                            openSearhSongScreen();
+                          },
+                          icon: Icon(Icons.search, size: 32),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _songMasterList.length,
+                        itemBuilder: (context, index) {
+                          var songList = [];
+                          songList = _songMasterList[index]['songs'];
+                          return Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                addVerticalSpace(DEFAULT_LARGE_SPACE),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  child: Text(
+                                    _songMasterList[index]['album'],
+                                    style: getTextTheme(
+                                      color: COLOR_GREY,
+                                    ).titleLarge,
+                                  ),
+                                ),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
 
-                            child: Row(
-                              spacing: 14,
-                              children: songList.map((elem) {
-                                return InkWell(
-                                  onTap: () {
-                                    openPlayerScreen(elem);
-                                  },
-                                  child: SongCard(title: elem['title'])
-                                );
-                              }).toList(),
+                                  child: Row(
+                                    spacing: 14,
+                                    children: songList.map((elem) {
+                                      return InkWell(
+                                        onTap: () {
+                                          openPlayerScreen(elem);
+                                        },
+                                        child: SongCard(
+                                          title: elem['title'],
+                                          imageUrl: elem['thumbnail'],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [ProgressCircular()],
                 ),
-              ),
-            ],
-          ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -133,7 +159,15 @@ class _SongListState extends State<SongList> {
   void openPlayerScreen(elem) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (builder) => PlayerScreen(songUrl: elem['song_url'], title: elem['title'],)),
+      MaterialPageRoute(
+        builder: (builder) => PlayerScreen(
+          song_id: elem['id'],
+          songUrl: elem['song_url'],
+          thumbnailUrl: elem['thumbnail'],
+          title: elem['title'],
+          artist: elem['artist'],
+        ),
+      ),
     );
   }
 

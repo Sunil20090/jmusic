@@ -26,12 +26,12 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
     super.initState();
     _searchController.addListener(_filterList);
     _filterList();
-
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(child: Scaffold(
+    return SafeArea(
+      child: Scaffold(
       body: Container(
         padding: SCREEN_PADDING,
         child: Column(

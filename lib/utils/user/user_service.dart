@@ -38,5 +38,5 @@ deleteUser() async {
 
 Future<int> getUserId() async {
   var obj = await loadJson(STORAGE_KEY_USER);
-  return obj['user_id'];
+  return obj['id'];
 }
