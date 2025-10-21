@@ -3,31 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:jmusic/components/rounded_rect_image.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/constants/url_constant.dart';
+import 'package:jmusic/modals/song_modal.dart';
 import 'package:jmusic/utils/api_service.dart';
 import 'package:jmusic/utils/common_function.dart';
+import 'package:jmusic/utils/music_handler.dart';
 import 'package:jmusic/utils/user/user_service.dart';
 import 'package:just_audio/just_audio.dart';
 
 class PlayerScreen extends StatefulWidget {
-  String? thumbnailUrl;
-  String songUrl, title, artist;
-  int song_id;
+  // String? thumbnailUrl;
+  // String songUrl, title, artist;
+  // int song_id;
 
-  PlayerScreen({
-    super.key,
-    required this.title,
-    required this.songUrl,
-    required this.song_id,
-    required this.artist,
-    this.thumbnailUrl,
-  });
+  SongModal song;
+
+  PlayerScreen({super.key, required this.song});
 
   @override
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  late AudioPlayer _player;
 
   var _relatedSongs = [];
 
@@ -35,12 +31,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
   void initState() {
     super.initState();
     _initPlayer();
-
     _initMusicList();
   }
 
   _initMusicList() async {
-    var body = {"referenceSongId": widget.song_id, "userId": await getUserId()};
+    var body = {"referenceSongId": widget.song.id, "userId": await getUserId()};
     ApiResponse response = await postService(URL_RELATED_SONGS, body);
 
     if (response.isSuccess) {
@@ -50,15 +45,18 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   _initPlayer() async {
-    _player = AudioPlayer();
+    if (MusicHandler.audioPlayer != null) {
+      MusicHandler.audioPlayer!.dispose();
+    }
+    MusicHandler.audioPlayer = AudioPlayer();
 
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration.music());
 
     try {
-      await _player.setUrl(widget.songUrl);
+      await MusicHandler.audioPlayer!.setUrl(widget.song.song_url);
 
-      await _player.play();
+      await MusicHandler.play();
 
       setState(() {});
     } catch (e) {
@@ -69,7 +67,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   void dispose() {
     super.dispose();
-    _player.dispose();
+    // _player.dispose();
   }
 
   @override
@@ -89,33 +87,35 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     child: RoundedRectImage(
                       width: 200,
                       height: 200,
-                      thumbnail_url: widget.thumbnailUrl,
+                      thumbnail_url: widget.song.thumbnail,
                     ),
                   ),
                 ),
 
                 Text(
-                  widget.title,
+                  widget.song.title,
                   style: getTextTheme(color: COLOR_PRIMARY).headlineMedium,
                 ),
                 Text(
-                  'By: ${widget.artist}',
+                  'By: ${widget.song.artist}',
                   style: getTextTheme(color: COLOR_SECONDARY).titleSmall,
                 ),
                 addVerticalSpace(),
                 Column(
                   children: [
                     StreamBuilder<Duration?>(
-                      stream: _player.durationStream,
+                      stream: MusicHandler.audioPlayer!.durationStream,
                       builder: (context, snapshot) {
                         final duration = snapshot.data;
                         return StreamBuilder<Duration>(
-                          stream: _player.positionStream,
+                          stream: MusicHandler.audioPlayer!.positionStream,
                           builder: (context, snapshot) {
                             final position = snapshot.data;
 
                             return StreamBuilder<Duration?>(
-                              stream: _player.bufferedPositionStream,
+                              stream: MusicHandler
+                                  .audioPlayer!
+                                  .bufferedPositionStream,
                               builder: (context, snapshot) {
                                 final bufferedPosition = snapshot.data;
                                 if (position == null ||
@@ -173,7 +173,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                                 position.inSeconds /
                                                 duration.inSeconds,
                                             onChanged: (value) {
-                                              _player.seek(
+                                              MusicHandler.audioPlayer!.seek(
                                                 Duration(
                                                   seconds:
                                                       (duration.inSeconds *
@@ -205,7 +205,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         ),
                         addHorizontalSpace(),
                         StreamBuilder<PlayerState>(
-                          stream: _player.playerStateStream,
+                          stream: MusicHandler.audioPlayer!.playerStateStream,
                           builder: (context, snapshot) {
                             final playerState = snapshot.data;
                             final playing = playerState?.playing;
@@ -220,7 +220,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               return IconButton(
                                 iconSize: 64,
                                 onPressed: () {
-                                  _player.play();
+                                  MusicHandler.play();
                                 },
                                 icon: Icon(Icons.play_arrow),
                               );
@@ -229,8 +229,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               return IconButton(
                                 iconSize: 64,
                                 onPressed: () async {
-                                  await _player.seek(Duration.zero);
-                                  await _player.play();
+                                  await MusicHandler.audioPlayer!.seek(Duration.zero);
+                                  await MusicHandler.play();
                                 },
                                 icon: Icon(
                                   Icons.replay_circle_filled,
@@ -241,7 +241,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               return IconButton(
                                 iconSize: 64,
                                 onPressed: () {
-                                  _player.pause();
+                                   MusicHandler.pause();
                                 },
                                 icon: Icon(Icons.pause_circle),
                               );
@@ -300,12 +300,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   void playSong(relatedSong) async {
-    widget.songUrl = relatedSong['song_url'];
-    widget.song_id = relatedSong['id'];
-    widget.title = relatedSong['title'];
-    widget.thumbnailUrl = relatedSong['thumbnail'];
+    widget.song.song_url = relatedSong['song_url'];
+    widget.song.id = relatedSong['id'];
+    widget.song.title = relatedSong['title'];
+    widget.song.thumbnail = relatedSong['thumbnail'];
     setState(() {});
-    _player.dispose();
+    MusicHandler.dispose();
     await _initPlayer();
   }
 }

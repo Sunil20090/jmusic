@@ -3,6 +3,7 @@ import 'package:jmusic/components/floating_label_edit_box.dart';
 import 'package:jmusic/constants/local_constant.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/constants/url_constant.dart';
+import 'package:jmusic/modals/song_modal.dart';
 import 'package:jmusic/utils/api_service.dart';
 import 'package:jmusic/utils/common_function.dart';
 import 'package:jmusic/utils/user/user_service.dart';
@@ -15,7 +16,6 @@ class SearchSongScreen extends StatefulWidget {
 }
 
 class _SearchSongScreenState extends State<SearchSongScreen> {
-
   var _filteredItems = [];
   var isCalling = false;
   var _lastQuery = null;
@@ -32,31 +32,44 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-      body: Container(
-        padding: SCREEN_PADDING,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Search', style: getTextTheme(color: COLOR_PRIMARY).headlineLarge),
-            addVerticalSpace(),
+        body: Container(
+          padding: SCREEN_PADDING,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Search',
+                style: getTextTheme(color: COLOR_PRIMARY).headlineLarge,
+              ),
 
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FloatingLabelEditBox(labelText: "Search...", 
-              controller: _searchController),
-            ),
+              addVerticalSpace(),
 
-            ..._filteredItems.map((song){
-              return ListTile(
-                title: Text('data'),
-              );
-            }).toList()
-          ],
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FloatingLabelEditBox(
+                  labelText: "Search...",
+                  controller: _searchController,
+                ),
+              ),
+
+              ..._filteredItems.map((song) {
+                return ListTile(
+                  onTap: () {
+                    Navigator.pop(context, SongModal.fromJson(song));
+                  },
+                  title: Text(
+                    '${song['title']}',
+                    style: getTextTheme().titleMedium,
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
-  
+
   void _filterList() async {
     final query = _searchController.text.toLowerCase();
 
@@ -72,7 +85,7 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
       _filterList();
     });
 
-    var body = {"query": query, 'userId' : await getUserId()};
+    var body = {"query": query, 'userId': await getUserId()};
     _lastQuery = query;
     postService(URL_SONG_QUERY, body).then((response) {
       if (response.isSuccess) {
@@ -82,5 +95,4 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
       }
     });
   }
-  
 }

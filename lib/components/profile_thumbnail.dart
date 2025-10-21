@@ -38,7 +38,7 @@ class _ProfileThumbnailState extends State<ProfileThumbnail> {
             child: widget.imageUrl == null && widget.thumnail_url == null
                 ? (widget.file == null)
                       ? Image.asset(
-                          IMAGE_PROFILE,
+                          ICON_APP,
                           width: widget.width,
                           height: widget.height,
                           fit: BoxFit.cover,
