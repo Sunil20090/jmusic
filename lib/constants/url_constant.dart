@@ -13,6 +13,7 @@ const URL_SONG_QUERY ='$_domain${_baseUrl}songQuery';
 
 
 const URL_RELATED_SONGS = '$_domain${_baseUrl}relatedSongs';
+const URL_NEXT_SONG = '$_domain${_baseUrl}nextSong';
 
 
 

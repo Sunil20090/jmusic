@@ -25,6 +25,7 @@ class _SongListState extends State<SongList> {
   var _songMasterList = [];
 
   bool fetchingSongs = false;
+  bool _fetchingNextSong = false;
 
   SongModal? _currentSong;
 
@@ -46,6 +47,7 @@ class _SongListState extends State<SongList> {
   }
 
   playSong(song) async {
+    _currentSong = song;
     try {
       await _player.setUrl(song.song_url);
 
@@ -192,6 +194,8 @@ class _SongListState extends State<SongList> {
                             },
                           ),
                         ),
+
+                        addVerticalSpace(60),
                       ],
                     )
                   : Row(
@@ -215,12 +219,39 @@ class _SongListState extends State<SongList> {
                 child: PlayerBottomSheet(
                   song: _currentSong!,
                   audioPlayer: _player,
+                  onNextClicked: playNextSong,
+                  fetchingNext: _fetchingNextSong,
                 ),
               ),
           ],
         ),
       ),
     );
+  }
+
+  void playNextSong() async {
+    // _player.dispose();
+    var body = {
+      "current_song_id": _currentSong!.id,
+      "userId": await getUserId(),
+    };
+
+    setState(() {
+      _fetchingNextSong = true;
+    });
+    ApiResponse response = await postService(URL_NEXT_SONG, body);
+
+    setState(() {
+      _fetchingNextSong = false;
+    });
+
+    if (response.isSuccess) {
+      SongModal nextSong = SongModal.fromJson(response.body[0]);
+      setState(() {
+        
+        playSong(nextSong);
+      });
+    }
   }
 
   void openPlayerScreen(SongModal song) async {
@@ -243,7 +274,9 @@ class _SongListState extends State<SongList> {
       MaterialPageRoute(builder: (builder) => SearchSongScreen()),
     );
     if (song != null) {
-      openPlayerScreen(song);
+      setState(() {
+        playSong(song);
+      });
     }
   }
 }

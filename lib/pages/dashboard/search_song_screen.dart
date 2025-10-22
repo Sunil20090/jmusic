@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jmusic/components/floating_label_edit_box.dart';
+import 'package:jmusic/components/rounded_rect_image.dart';
 import 'package:jmusic/constants/local_constant.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/constants/url_constant.dart';
@@ -30,41 +31,55 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          padding: SCREEN_PADDING,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Search',
-                style: getTextTheme(color: COLOR_PRIMARY).headlineLarge,
+    return Scaffold(
+      body: Container(
+        padding: SCREEN_PADDING,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Search',
+              style: getTextTheme(color: COLOR_PRIMARY).headlineLarge,
+            ),
+    
+            addVerticalSpace(),
+    
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FloatingLabelEditBox(
+                labelText: "Search...",
+                controller: _searchController,
               ),
-
-              addVerticalSpace(),
-
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: FloatingLabelEditBox(
-                  labelText: "Search...",
-                  controller: _searchController,
+            ),
+    
+            ..._filteredItems.map((song) {
+              return ListTile(
+                onTap: () {
+                  Navigator.pop(context, SongModal.fromJson(song));
+                },
+                title: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    RoundedRectImage(thumbnail_url:  song['thumbnail'], width: 40, height: 40,),
+                    addHorizontalSpace(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${song['title']}',
+                          style: getTextTheme().titleMedium,
+                        ),
+                        Text(
+                          '${song['artist']}',
+                          style: getTextTheme().bodySmall,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-
-              ..._filteredItems.map((song) {
-                return ListTile(
-                  onTap: () {
-                    Navigator.pop(context, SongModal.fromJson(song));
-                  },
-                  title: Text(
-                    '${song['title']}',
-                    style: getTextTheme().titleMedium,
-                  ),
-                );
-              }).toList(),
-            ],
-          ),
+              );
+            }).toList(),
+          ],
         ),
       ),
     );

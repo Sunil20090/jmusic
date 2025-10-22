@@ -33,8 +33,10 @@ class _ProfileThumbnailState extends State<ProfileThumbnail> {
       child: Hero(
         tag: widget.tag!,
         child: CircleAvatar(
+          
           radius: widget.radius,
           child: ClipOval(
+             
             child: widget.imageUrl == null && widget.thumnail_url == null
                 ? (widget.file == null)
                       ? Image.asset(

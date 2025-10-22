@@ -145,6 +145,14 @@ CREATE TABLE jmusic_songs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE jmusic_songs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    artist VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 +-------------------------------------+
 | Tables_in_Sunil20090$gov            |
 +-------------------------------------+

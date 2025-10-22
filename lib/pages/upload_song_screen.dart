@@ -37,101 +37,99 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          padding: SCREEN_PADDING,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              addVerticalSpace(DEFAULT_LARGE_SPACE * 3),
-              FloatingLabelEditBox(
-                labelText: 'Name',
-                controller: _nameCotroller,
-              ),
-              addVerticalSpace(),
-              FloatingLabelEditBox(
-                labelText: 'Artist names',
-                controller: _artistCotroller,
-              ),
-              addVerticalSpace(),
-              FloatingLabelEditBox(
-                labelText: 'Album',
-                controller: _albumController,
-              ),
-              addVerticalSpace(),
-              Divider(),
-              RoundIt(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    ColoredButton(
-                      onPressed: () {
-                        chooseMusicFile();
-                      },
-                      child: Text(
-                        'Choose Music File',
-                        style: getTextTheme(color: COLOR_WHITE).titleMedium,
-                      ),
-                    ),
-                    if (_musicFile != null)
-                      Row(
-                        children: [
-                          addHorizontalSpace(),
-                          Text('Attached', style: getTextTheme().titleSmall),
-                          Icon(Icons.check),
-                        ],
-                      ),
-                  ],
-                ),
-              ),
-              Divider(),
-              addVerticalSpace(),
-              Row(
+    return Scaffold(
+      body: Container(
+        padding: SCREEN_PADDING,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            addVerticalSpace(DEFAULT_LARGE_SPACE * 3),
+            FloatingLabelEditBox(
+              labelText: 'Name',
+              controller: _nameCotroller,
+            ),
+            addVerticalSpace(),
+            FloatingLabelEditBox(
+              labelText: 'Artist names',
+              controller: _artistCotroller,
+            ),
+            addVerticalSpace(),
+            FloatingLabelEditBox(
+              labelText: 'Album',
+              controller: _albumController,
+            ),
+            addVerticalSpace(),
+            Divider(),
+            RoundIt(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  RoundIt(
-                    child: ColoredButton(
-                      onPressed: () {
-                        chooseImageFile();
-                      },
-                      child: Text(
-                        'Choose Image File',
-                        style: getTextTheme(color: COLOR_WHITE).titleMedium,
-                      ),
+                  ColoredButton(
+                    onPressed: () {
+                      chooseMusicFile();
+                    },
+                    child: Text(
+                      'Choose Music File',
+                      style: getTextTheme(color: COLOR_WHITE).titleMedium,
                     ),
                   ),
-                  if (_imageFile != null)
-                    RoundIt(
-                      child: SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: Image.file(_imageFile!),
-                      ),
+                  if (_musicFile != null)
+                    Row(
+                      children: [
+                        addHorizontalSpace(),
+                        Text('Attached', style: getTextTheme().titleSmall),
+                        Icon(Icons.check),
+                      ],
                     ),
                 ],
               ),
-
-              addVerticalSpace(DEFAULT_LARGE_SPACE),
-              ColoredButton(
-                onPressed: !(_uploadingFile)
-                    ? () {
-                        uploadSong();
-                      }
-                    : null,
-                child: (!_uploadingFile)
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Upload Song!',
-                            style: getTextTheme(color: COLOR_WHITE).titleMedium,
-                          ),
-                        ],
-                      )
-                    : ProgressCircular(),
-              ),
-            ],
-          ),
+            ),
+            Divider(),
+            addVerticalSpace(),
+            Row(
+              children: [
+                RoundIt(
+                  child: ColoredButton(
+                    onPressed: () {
+                      chooseImageFile();
+                    },
+                    child: Text(
+                      'Choose Image File',
+                      style: getTextTheme(color: COLOR_WHITE).titleMedium,
+                    ),
+                  ),
+                ),
+                if (_imageFile != null)
+                  RoundIt(
+                    child: SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: Image.file(_imageFile!),
+                    ),
+                  ),
+              ],
+            ),
+    
+            addVerticalSpace(DEFAULT_LARGE_SPACE),
+            ColoredButton(
+              onPressed: !(_uploadingFile)
+                  ? () {
+                      uploadSong();
+                    }
+                  : null,
+              child: (!_uploadingFile)
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Upload Song!',
+                          style: getTextTheme(color: COLOR_WHITE).titleMedium,
+                        ),
+                      ],
+                    )
+                  : ProgressCircular(),
+            ),
+          ],
         ),
       ),
     );
