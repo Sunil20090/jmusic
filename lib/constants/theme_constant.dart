@@ -28,7 +28,7 @@ const COLOR_TRANSLUSCENT_BLACK = Color.fromARGB(118, 0, 0, 0);
 const EdgeInsets CONTENT_PADDING = EdgeInsets.all(8);
 
 const EdgeInsets SCREEN_PADDING =
-    EdgeInsets.symmetric(horizontal: 12, vertical: 28);
+    EdgeInsets.symmetric(horizontal: 12, vertical: 18);
 
 const double CONTENT_PADDING_VALUE = 8;
 

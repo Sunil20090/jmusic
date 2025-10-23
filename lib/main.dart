@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jmusic/pages/splash_screen.dart';
 
-
 void main() async {
-  
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  
   MyApp({super.key});
 
   @override
@@ -19,7 +16,6 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: SplashScreen(),
-      
     );
   }
 }

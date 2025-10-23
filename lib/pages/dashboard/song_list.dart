@@ -48,12 +48,12 @@ class _SongListState extends State<SongList> {
 
   playSong(song) async {
     _currentSong = song;
+    setState(() {});
+    _player.stop();
     try {
-      await _player.setUrl(song.song_url);
+      _player.setUrl(song.song_url);
 
-      await _player.play();
-
-      setState(() {});
+      _player.play();
     } catch (e) {
       // print("error : $e");
     }
@@ -110,156 +110,106 @@ class _SongListState extends State<SongList> {
     return SafeArea(
       top: false,
       child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              padding: SCREEN_PADDING,
-              child: (!fetchingSongs)
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Songs',
-                              style: getTextTheme(
-                                color: COLOR_PRIMARY,
-                              ).headlineLarge,
-                            ),
-                            Spacer(),
-                            IconButton(
-                              color: COLOR_PRIMARY,
-                              onPressed: () {
-                                openUploadSongScreen();
-                              },
-                              icon: Icon(Icons.upload, size: 32),
-                            ),
-                            IconButton(
-                              color: COLOR_PRIMARY,
-                              onPressed: () {
-                                openSearhSongScreen();
-                              },
-                              icon: Icon(Icons.search, size: 32),
-                            ),
-                          ],
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: _songMasterList.length,
-                            itemBuilder: (context, index) {
-                              var songList = [];
-                              songList = _songMasterList[index]['songs'];
-                              return Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 24,
-                                        left: 8,
-                                      ),
-                                      child: Text(
-                                        _songMasterList[index]['album'],
-                                        style: getTextTheme(
-                                          color: COLOR_SECONDARY,
-                                        ).titleLarge,
-                                      ),
-                                    ),
-                                    SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        spacing: 14,
-                                        children: songList.map((elem) {
-                                          return InkWell(
-                                            onTap: () {
-                                              setState(() {
-                                                _currentSong =
-                                                    SongModal.fromJson(elem);
-                                                playSong(_currentSong);
-                                              });
-                                            },
-                                            child: SongCard(
-                                              title: elem['title'],
-                                              imageUrl: elem['thumbnail'],
-                                            ),
-                                          );
-                                        }).toList(),
-                                      ),
-                                    ),
-                                    addVerticalSpace(),
-                                    Divider(height: 2, thickness: 0.4),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                        addVerticalSpace(60),
-                      ],
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        addVerticalSpace(DEFAULT_LARGE_SPACE),
-                        ProgressCircular(
-                          color: COLOR_BLACK,
-                          width: 42,
-                          height: 42,
-                        ),
-                      ],
-                    ),
-            ),
-
-            if (_currentSong != null)
-              Positioned(
-                bottom: 4,
-                right: 4,
-                left: 4,
-                child: PlayerBottomSheet(
-                  song: _currentSong!,
-                  audioPlayer: _player,
-                  onNextClicked: playNextSong,
-                  fetchingNext: _fetchingNextSong,
-                ),
+        appBar: AppBar(
+          title: Row(
+            children: [
+              Text(
+                'Songs',
+                style: getTextTheme(color: COLOR_PRIMARY).headlineLarge,
               ),
-          ],
+              Spacer(),
+              IconButton(
+                color: COLOR_PRIMARY,
+                onPressed: () {
+                  openUploadSongScreen();
+                },
+                icon: Icon(Icons.upload, size: 32),
+              ),
+              IconButton(
+                color: COLOR_PRIMARY,
+                onPressed: () {
+                  openSearhSongScreen();
+                },
+                icon: Icon(Icons.search, size: 32),
+              ),
+            ],
+          ),
+        ),
+        body: Container(
+          padding: SCREEN_PADDING,
+          child: (!fetchingSongs)
+              ? Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _songMasterList.length,
+                        itemBuilder: (context, index) {
+                          var songList = [];
+                          songList = _songMasterList[index]['songs'];
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  addHorizontalSpace(),
+                                  Text(
+                                    _songMasterList[index]['album'],
+                                    style: getTextTheme(
+                                      color: COLOR_SECONDARY,
+                                    ).titleLarge,
+                                  ),
+                                ],
+                              ),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  spacing: 14,
+                                  children: songList.map((elem) {
+                                    return InkWell(
+                                      onTap: () {
+                                        _currentSong = SongModal.fromJson(elem);
+                                        playSong(_currentSong);
+                                      },
+                                      child: SongCard(
+                                        title: elem['title'],
+                                        imageUrl: elem['thumbnail'],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              addVerticalSpace(),
+                              Divider(height: 2, thickness: 0.4),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+
+                    (_currentSong != null)
+                        ? PlayerBottomSheet(
+                          song: _currentSong!,
+                          audioPlayer: _player,
+                          playSongMethod: playSong,
+                        )
+                        : addHorizontalSpace(60),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    addVerticalSpace(DEFAULT_LARGE_SPACE),
+                    ProgressCircular(color: COLOR_BLACK, width: 32, height: 32),
+                  ],
+                ),
         ),
       ),
     );
   }
 
-  void playNextSong() async {
-    // _player.dispose();
-    var body = {
-      "current_song_id": _currentSong!.id,
-      "userId": await getUserId(),
-    };
+  
 
-    setState(() {
-      _fetchingNextSong = true;
-    });
-    ApiResponse response = await postService(URL_NEXT_SONG, body);
-
-    setState(() {
-      _fetchingNextSong = false;
-    });
-
-    if (response.isSuccess) {
-      SongModal nextSong = SongModal.fromJson(response.body[0]);
-      setState(() {
-        
-        playSong(nextSong);
-      });
-    }
-  }
-
-  void openPlayerScreen(SongModal song) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (builder) => PlayerScreen(song: song)),
-    );
-  }
+  
 
   void openUploadSongScreen() {
     Navigator.push(

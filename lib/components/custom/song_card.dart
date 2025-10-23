@@ -15,13 +15,10 @@ class SongCard extends StatelessWidget {
       children: [
         Card(
           elevation: 4,
-          child: Container(
-            padding: EdgeInsets.all(2),
-            child: RoundedRectImage(
-              width: 160,
-              height: 160,
-              thumbnail_url: imageUrl,
-            ),
+          child: RoundedRectImage(
+            width: 150,
+            height: 150,
+            thumbnail_url: imageUrl,
           ),
         ),
         addVerticalSpace(2),
@@ -32,7 +29,8 @@ class SongCard extends StatelessWidget {
               title,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
-              style: getTextTheme().titleMedium,
+              
+              style: getTextTheme().bodyMedium,
             ),
           ],
         ),

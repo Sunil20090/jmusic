@@ -152,6 +152,15 @@ CREATE TABLE jmusic_songs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE jmusic_favourites(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    song_id INT,
+    FOREIGN KEY (song_id) references jmusic_songs(id),
+    FOREIGN KEY (user_id) references jmusic_users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 +-------------------------------------+
 | Tables_in_Sunil20090$gov            |

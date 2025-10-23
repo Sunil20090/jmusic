@@ -1,5 +1,6 @@
 class SongModal {
   int id;
+  bool isFavourite;
   String title, song_url, artist;
   String? thumbnail;
 
@@ -9,6 +10,7 @@ class SongModal {
     required this.artist,
     required this.song_url,
     this.thumbnail,
+    this.isFavourite = false
   });
 
   static SongModal fromJson(obj) {
@@ -17,7 +19,7 @@ class SongModal {
       title: obj['title'],
       artist: obj['artist'],
       song_url: obj['song_url'],
-      thumbnail: obj['thumbnail']
+      thumbnail: obj['thumbnail'],
     );
   }
 }

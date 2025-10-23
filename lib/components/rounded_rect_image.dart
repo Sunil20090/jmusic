@@ -25,7 +25,7 @@ class _RoundedRectImageState extends State<RoundedRectImage> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: COLOR_BASE_DARKER, width: 1),
+        border: Border.all(color: COLOR_BASE_DARKER, width: 0),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
