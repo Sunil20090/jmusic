@@ -3,6 +3,7 @@ import 'package:jmusic/constants/url_constant.dart';
 import 'package:jmusic/pages/dashboard/song_list.dart';
 import 'package:jmusic/utils/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:jmusic/utils/settings/setting_utils.dart';
 import 'package:jmusic/utils/user/user_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    SettingUtils.initSetting();
     initUser().then((value) {
       moveToDashBoard();
     });
@@ -43,11 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 50,
-              height: 50,
-              child: Image.asset(ICON_APP),
-            ),
+            SizedBox(width: 50, height: 50, child: Image.asset(ICON_APP)),
           ],
         ),
       ],

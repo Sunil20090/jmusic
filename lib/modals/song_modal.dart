@@ -20,6 +20,7 @@ class SongModal {
       artist: obj['artist'],
       song_url: obj['song_url'],
       thumbnail: obj['thumbnail'],
+      isFavourite: obj['isFavourite'] == 1
     );
   }
 }

@@ -16,13 +16,13 @@ class ScreenActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Padding(
-        padding: const EdgeInsets.only(
+      padding: const EdgeInsets.only(
           left: CONTENT_PADDING_VALUE,
           right: CONTENT_PADDING_VALUE,
           top: CONTENT_PADDING_VALUE,
         ),
-        child: Column(
+      child: 
+         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
@@ -49,11 +49,8 @@ class ScreenActionBar extends StatelessWidget {
                 Container(child: child),
               ],
             ),
-            addVerticalSpace(),
-            Divider(height: 1),
           ],
         ),
-      ),
     );
   }
 }

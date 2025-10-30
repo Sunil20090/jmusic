@@ -6,6 +6,7 @@ import 'package:jmusic/constants/url_constant.dart';
 import 'package:jmusic/modals/song_modal.dart';
 import 'package:jmusic/utils/api_service.dart';
 import 'package:jmusic/utils/common_function.dart';
+import 'package:jmusic/utils/settings/setting_utils.dart';
 import 'package:jmusic/utils/user/user_service.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -33,10 +34,40 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> {
   var _relatedSongs = [];
 
+  SongModal? _nextSong;
+
+  bool _fetchingNextSong = false;
+  bool _isMusicEnded = false;
+
   @override
   void initState() {
     super.initState();
     _initRelatedMusicList();
+
+    widget.audioPlayer.processingStateStream.listen((processState) {
+      if (processState == ProcessingState.completed) {
+        if (SettingUtils.repeatType == SettingUtils.REPEAT_ALL) {
+          setState(() {
+            _isMusicEnded = false;
+          });
+          playNextSong();
+        } else if (SettingUtils.repeatType == SettingUtils.REPEAT_ONE) {
+          setState(() {
+          _isMusicEnded = false;
+          });
+          restartSong();
+        } else {
+          setState(() {
+            _isMusicEnded = true;
+          });
+        }
+      }
+    });
+  }
+
+  restartSong() {
+    widget.audioPlayer.seek(Duration.zero);
+    widget.audioPlayer.play();
   }
 
   _initRelatedMusicList() async {
@@ -48,8 +79,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
       setState(() {});
     }
   }
-
-  double _opacity = 1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +204,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         onPressed: () {
                           addToFavorite();
                         },
-                        icon: Icon(Icons.favorite),
+                        icon: (widget.song.isFavourite)
+                            ? Icon(Icons.favorite, color: Colors.redAccent)
+                            : Icon(Icons.favorite),
                       ),
 
                       IconButton(
@@ -207,26 +238,16 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               },
                               icon: Icon(Icons.play_circle_fill),
                             );
-                          } else if (processingState ==
-                              ProcessingState.completed) {
-                            return IconButton(
-                              iconSize: 64,
-                              onPressed: () async {
-                                await widget.audioPlayer.seek(Duration.zero);
-                                await widget.audioPlayer.play();
-                              },
-                              icon: Icon(
-                                Icons.replay_circle_filled,
-                                color: COLOR_PRIMARY,
-                              ),
-                            );
                           } else {
                             return IconButton(
                               iconSize: 64,
                               onPressed: () {
                                 widget.audioPlayer.pause();
                               },
-                              icon: Icon(Icons.pause_circle),
+                              icon: Icon(
+                                Icons.pause_circle_filled,
+                                color: COLOR_PRIMARY,
+                              ),
                             );
                           }
                         },
@@ -234,16 +255,28 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       addHorizontalSpace(),
                       IconButton(
                         iconSize: 48,
-                        onPressed: () {},
-                        icon: Icon(Icons.skip_next),
+                        onPressed: () {
+                          playNextSong();
+                        },
+                        icon: (!_fetchingNextSong)
+                            ? Icon(Icons.skip_next)
+                            : ProgressCircular(color: COLOR_BLACK),
                       ),
 
                       IconButton(
                         iconSize: 32,
                         onPressed: () {
-                          addToFavorite();
+                          setState(() {
+                            SettingUtils.toggleRepeat();
+                          });
                         },
-                        icon: Icon(Icons.repeat_one),
+                        icon:
+                            (SettingUtils.repeatType == SettingUtils.REPEAT_ONE)
+                            ? Icon(Icons.repeat_one, color: COLOR_PRIMARY)
+                            : (SettingUtils.repeatType ==
+                                  SettingUtils.REPEAT_ALL)
+                            ? Icon(Icons.repeat_on, color: COLOR_PRIMARY)
+                            : Icon(Icons.repeat),
                       ),
                     ],
                   ),
@@ -313,28 +346,46 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   void setSong(relatedSong) async {
-    widget.song.song_url = relatedSong['song_url'];
-    widget.song.id = relatedSong['id'];
-    widget.song.title = relatedSong['title'];
-    widget.song.thumbnail = relatedSong['thumbnail'];
-    setState(() {
-      if (_opacity == 0) {
-        _opacity = 1;
-      } else {
-        _opacity = 0;
-      }
-    });
-
+    widget.song = SongModal.fromJson(relatedSong);
     playSong(widget.song);
   }
 
   void addToFavorite() async {
+    setState(() {
+      if (widget.song.isFavourite) {
+        widget.song.isFavourite = false;
+      } else {
+        widget.song.isFavourite = true;
+      }
+    });
+
     var body = {"userId": await getUserId(), "songId": widget.song.id};
 
     ApiResponse response = await postService(URL_ADD_TO_FAVOURITE, body);
 
     if (response.isSuccess) {
       print(response.body);
+    }
+  }
+
+  void playNextSong() async {
+    // _player.dispose();
+    var body = {"current_song_id": widget.song.id, "userId": await getUserId()};
+
+    setState(() {
+      _fetchingNextSong = true;
+    });
+    ApiResponse response = await postService(URL_NEXT_SONG, body);
+
+    setState(() {
+      _fetchingNextSong = false;
+    });
+
+    if (response.isSuccess) {
+      SongModal nextSong = SongModal.fromJson(response.body[0]);
+      widget.song = nextSong;
+      setState(() {});
+      playSong(widget.song);
     }
   }
 }

@@ -104,7 +104,7 @@ class _PlayerBottomSheetState extends State<PlayerBottomSheet> {
                   }
                 },
               ),
-        
+
               IconButton(
                 onPressed: () {
                   playNextSong();
@@ -113,7 +113,7 @@ class _PlayerBottomSheetState extends State<PlayerBottomSheet> {
                     ? Icon(Icons.skip_next)
                     : ProgressCircular(color: COLOR_BLACK),
               ),
-        
+
               addHorizontalSpace(8),
             ],
           ),
@@ -123,7 +123,7 @@ class _PlayerBottomSheetState extends State<PlayerBottomSheet> {
   }
 
   void playNextSong() async {
-    // _player.dispose();
+    
     var body = {"current_song_id": widget.song.id, "userId": await getUserId()};
 
     setState(() {
@@ -138,6 +138,7 @@ class _PlayerBottomSheetState extends State<PlayerBottomSheet> {
     if (response.isSuccess) {
       SongModal nextSong = SongModal.fromJson(response.body[0]);
       setState(() {
+        widget.audioPlayer.dispose();
         widget.playSongMethod(nextSong);
       });
     }

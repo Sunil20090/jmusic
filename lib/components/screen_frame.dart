@@ -10,6 +10,7 @@ class ScreenFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      top: true,
       child: Scaffold(
         body: Container(
           padding: SCREEN_PADDING,
