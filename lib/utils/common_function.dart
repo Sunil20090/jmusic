@@ -4,6 +4,9 @@ import 'package:jmusic/components/colored_button.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jmusic/constants/url_constant.dart';
+import 'package:jmusic/utils/api_service.dart';
+import 'package:jmusic/utils/user/user_service.dart';
 import 'package:just_audio/just_audio.dart';
 
 const double DEFAULT_SPACE = 12;
@@ -130,3 +133,14 @@ String formatDurationInMinutes(Duration duration) {
   return '$minutes:$seconds';
 }
 
+screenRecord({required String screen, required String event_name, int? ref_id}) async {
+  final user_id = await getUserId();
+  var body = {
+    "user_id": user_id,
+    "screen_name": screen,
+    "event_name": event_name,
+    "reference_id": ref_id,
+  };
+
+  await postService(URL_SCREEN_RECORD, body);
+}

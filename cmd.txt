@@ -152,12 +152,33 @@ CREATE TABLE jmusic_songs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
+CREATE TABLE jmusic_album_favourites(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    album_id INT,
+    FOREIGN KEY (album_id) references jmusic_albums(id),
+    FOREIGN KEY (user_id) references jmusic_users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 CREATE TABLE jmusic_favourites(
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     song_id INT,
     FOREIGN KEY (song_id) references jmusic_songs(id),
     FOREIGN KEY (user_id) references jmusic_users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE jmusic_screen_log(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    screen varchar(100) NOT NULL,
+    event_name varchar(100),
+    FOREIGN KEY (user_id) references jmusic_users(id),
+    reference_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

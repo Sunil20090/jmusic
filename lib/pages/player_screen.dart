@@ -11,20 +11,14 @@ import 'package:jmusic/utils/user/user_service.dart';
 import 'package:just_audio/just_audio.dart';
 
 class PlayerScreen extends StatefulWidget {
-  // String? thumbnailUrl;
-  // String songUrl, title, artist;
-  // int song_id;
-
   SongModal song;
   AudioPlayer audioPlayer;
-
-  Function(SongModal song) playSong;
 
   PlayerScreen({
     super.key,
     required this.song,
     required this.audioPlayer,
-    required this.playSong,
+
   });
 
   @override
@@ -34,32 +28,24 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> {
   var _relatedSongs = [];
 
-  SongModal? _nextSong;
-
   bool _fetchingNextSong = false;
-  bool _isMusicEnded = false;
 
   @override
   void initState() {
     super.initState();
     _initRelatedMusicList();
 
+    screenRecord(
+      screen: 'player_screen',
+      ref_id: widget.song.id,
+      event_name: 'screen_open',
+    );
     widget.audioPlayer.processingStateStream.listen((processState) {
       if (processState == ProcessingState.completed) {
         if (SettingUtils.repeatType == SettingUtils.REPEAT_ALL) {
-          setState(() {
-            _isMusicEnded = false;
-          });
           playNextSong();
         } else if (SettingUtils.repeatType == SettingUtils.REPEAT_ONE) {
-          setState(() {
-          _isMusicEnded = false;
-          });
           restartSong();
-        } else {
-          setState(() {
-            _isMusicEnded = true;
-          });
         }
       }
     });
@@ -238,6 +224,19 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               },
                               icon: Icon(Icons.play_circle_fill),
                             );
+                          } else if (processingState ==
+                              ProcessingState.completed) {
+                            return IconButton(
+                              iconSize: 64,
+                              onPressed: () async {
+                                await widget.audioPlayer.seek(Duration.zero);
+                                await widget.audioPlayer.play();
+                              },
+                              icon: Icon(
+                                Icons.replay_circle_filled,
+                                color: COLOR_PRIMARY,
+                              ),
+                            );
                           } else {
                             return IconButton(
                               iconSize: 64,
@@ -297,7 +296,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     final relatedSong = _relatedSongs[index];
                     return ListTile(
                       onTap: () {
-                        setSong(relatedSong);
+                        setState(() {
+                          widget.song = SongModal.fromJson(relatedSong);
+                        });
+                        playSong();
                       },
                       title: Row(
                         children: [
@@ -334,10 +336,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   }
 
-  playSong(song) async {
-    setState(() {});
+  playSong() async {
     try {
-      widget.audioPlayer.setUrl(song.song_url);
+      widget.audioPlayer.setUrl(widget.song.song_url);
 
       widget.audioPlayer.play();
     } catch (e) {
@@ -345,10 +346,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
     }
   }
 
-  void setSong(relatedSong) async {
-    widget.song = SongModal.fromJson(relatedSong);
-    playSong(widget.song);
-  }
 
   void addToFavorite() async {
     setState(() {
@@ -382,10 +379,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
     });
 
     if (response.isSuccess) {
-      SongModal nextSong = SongModal.fromJson(response.body[0]);
-      widget.song = nextSong;
+      widget.song = SongModal.fromJson(response.body[0]);
       setState(() {});
-      playSong(widget.song);
+      
+      playSong();
     }
   }
 }

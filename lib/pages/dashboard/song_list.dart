@@ -27,7 +27,7 @@ class _SongListState extends State<SongList> {
   bool fetchingSongs = false;
   bool _fetchingNextSong = false;
 
-  SongModal? _currentSong;
+  late SongModal _currentSong;
 
   late AudioPlayer _player;
 
@@ -46,12 +46,11 @@ class _SongListState extends State<SongList> {
     await session.configure(AudioSessionConfiguration.music());
   }
 
-  playSong(song) async {
-    _currentSong = song;
+  playSong() async {
     setState(() {});
     _player.stop();
     try {
-      _player.setUrl(song.song_url);
+      _player.setUrl(_currentSong.song_url);
 
       _player.play();
     } catch (e) {
@@ -168,11 +167,17 @@ class _SongListState extends State<SongList> {
                                     return InkWell(
                                       onTap: () {
                                         _currentSong = SongModal.fromJson(elem);
-                                        playSong(_currentSong);
+
+                                        screenRecord(
+                                          screen: 'song_list',
+                                          event_name: 'song_clicked',
+                                          ref_id: elem['id'],
+                                        );
+                                        playSong();
                                       },
                                       child: SongCard(
                                         title: elem['title'],
-                                        imageUrl: elem['thumbnail'],
+                                        imageUrl: elem['thumbnail']
                                       ),
                                     );
                                   }).toList(),
@@ -187,11 +192,20 @@ class _SongListState extends State<SongList> {
                     ),
 
                     (_currentSong != null)
-                        ? PlayerBottomSheet(
-                          song: _currentSong!,
-                          audioPlayer: _player,
-                          playSongMethod: playSong,
-                        )
+                        ? InkWell(
+                            onTap: () {
+                              openPlayerScreen();
+                            },
+                            child: PlayerBottomSheet(
+                              song: _currentSong!,
+                              audioPlayer: _player,
+                              playSongMethod: (song) {
+                                _currentSong = song;
+                                // setState(() {});
+                                playSong();
+                              },
+                            ),
+                          )
                         : addHorizontalSpace(60),
                   ],
                 )
@@ -207,10 +221,6 @@ class _SongListState extends State<SongList> {
     );
   }
 
-  
-
-  
-
   void openUploadSongScreen() {
     Navigator.push(
       context,
@@ -225,8 +235,21 @@ class _SongListState extends State<SongList> {
     );
     if (song != null) {
       setState(() {
-        playSong(song);
+        _currentSong = song;
+        playSong();
       });
     }
+  }
+
+  openPlayerScreen() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (builder) =>
+            PlayerScreen(song: _currentSong!, audioPlayer: _player),
+      ),
+    );
+
+    setState(() {});
   }
 }

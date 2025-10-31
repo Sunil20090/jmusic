@@ -27,6 +27,8 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
     super.initState();
     _searchController.addListener(_filterList);
     _filterList();
+
+    screenRecord(screen: 'search', event_name: 'screen_open');
   }
 
   @override
@@ -37,17 +39,15 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
         appBar: AppBar(
           foregroundColor: COLOR_PRIMARY,
           title: Text(
-                'Search',
-                style: getTextTheme(color: COLOR_PRIMARY).headlineLarge,
-              ),
+            'Search',
+            style: getTextTheme(color: COLOR_PRIMARY).headlineLarge,
+          ),
         ),
         body: Container(
-          
           padding: SCREEN_PADDING,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-      
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: FloatingLabelEditBox(
@@ -55,16 +55,22 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
                   controller: _searchController,
                 ),
               ),
-      
+
               ..._filteredItems.map((song) {
                 return ListTile(
                   onTap: () {
-                    Navigator.pop(context, SongModal.fromJson(song));
+                    final choosen_song = SongModal.fromJson(song);
+                    screenRecord(screen: 'search', event_name: 'song_clicked');
+                    Navigator.pop(context, choosen_song);
                   },
                   title: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      RoundedRectImage(thumbnail_url:  song['thumbnail'], width: 40, height: 40,),
+                      RoundedRectImage(
+                        thumbnail_url: song['thumbnail'],
+                        width: 40,
+                        height: 40,
+                      ),
                       addHorizontalSpace(),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
