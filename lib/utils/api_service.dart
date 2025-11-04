@@ -28,9 +28,9 @@ Future<ApiResponse> postService(String url, dynamic body) async {
   var reponseBody = response.statusCode == 200
       ? jsonDecode(response.body)
       : response.body;
- // print(
-  //  'URL: $url \n Payload: $request_body\n  \n Response Body:\n \t$reponseBody',
-  //);
+ print(
+   'URL: $url \n Payload: $request_body\n  \n Response Body:\n \t$reponseBody',
+  );
   return ApiResponse(
     body: reponseBody,
     isSuccess: response.statusCode == 200,

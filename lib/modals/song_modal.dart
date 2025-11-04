@@ -10,7 +10,7 @@ class SongModal {
     required this.artist,
     required this.song_url,
     this.thumbnail,
-    this.isFavourite = false
+    this.isFavourite = false,
   });
 
   static SongModal fromJson(obj) {
@@ -20,7 +20,16 @@ class SongModal {
       artist: obj['artist'],
       song_url: obj['song_url'],
       thumbnail: obj['thumbnail'],
-      isFavourite: obj['isFavourite'] == 1
+      isFavourite: obj['isFavourite'] == 1,
+    );
+  }
+
+  static SongModal dummy() {
+    return SongModal(
+      id: 0,
+      title: 'title',
+      artist: 'artist',
+      song_url: 'song_url',
     );
   }
 }

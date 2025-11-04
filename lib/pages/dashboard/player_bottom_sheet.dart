@@ -4,7 +4,6 @@ import 'package:jmusic/components/progress_circular.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/constants/url_constant.dart';
 import 'package:jmusic/modals/song_modal.dart';
-import 'package:jmusic/pages/player_screen.dart';
 import 'package:jmusic/utils/api_service.dart';
 import 'package:jmusic/utils/common_function.dart';
 import 'package:jmusic/utils/settings/setting_utils.dart';

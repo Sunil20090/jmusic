@@ -6,4 +6,4 @@
 //Placeholders
 const String PLACEHOLDER_IMAGE_MUSIC = 'res/images/placeholder_music_image.png';
 
-const String ICON_APP = 'res/images/icon.png';
+const String ICON_APP = 'res/icons/icon.png';

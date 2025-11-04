@@ -14,11 +14,13 @@ class PlayerScreen extends StatefulWidget {
   SongModal song;
   AudioPlayer audioPlayer;
 
+  Function(SongModal song) onSongSelected;
+
   PlayerScreen({
     super.key,
     required this.song,
     required this.audioPlayer,
-
+    required this.onSongSelected,
   });
 
   @override
@@ -42,10 +44,19 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
     widget.audioPlayer.processingStateStream.listen((processState) {
       if (processState == ProcessingState.completed) {
-        if (SettingUtils.repeatType == SettingUtils.REPEAT_ALL) {
-          playNextSong();
-        } else if (SettingUtils.repeatType == SettingUtils.REPEAT_ONE) {
+        if (SettingUtils.repeatType == SettingUtils.REPEAT_ONE) {
           restartSong();
+          return;
+        }
+
+        if (SettingUtils.suffleType == SettingUtils.SUFFLE_OFF) {
+          if (SettingUtils.repeatType == SettingUtils.REPEAT_ALL) {
+            playNextSong();
+          }
+        } else if (SettingUtils.suffleType == SettingUtils.SUFFLE_ON){
+          if (SettingUtils.repeatType == SettingUtils.REPEAT_ALL) {
+            playNextSong();
+          }
         }
       }
     });
@@ -87,15 +98,46 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   ),
                 ),
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    iconSize: 32,
+                    onPressed: () {
+                      addToFavorite();
+                    },
+                    icon: (widget.song.isFavourite)
+                        ? Icon(Icons.favorite, color: Colors.redAccent)
+                        : Icon(Icons.favorite),
+                  ),
+                  Spacer(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.song.title,
+                        style: getTextTheme(
+                          color: COLOR_PRIMARY,
+                        ).headlineMedium,
+                      ),
+                      Text(
+                        'By: ${widget.song.artist}',
+                        style: getTextTheme(color: COLOR_SECONDARY).titleSmall,
+                      ),
+                    ],
+                  ),
+                  Spacer(),
 
-              Text(
-                widget.song.title,
-                style: getTextTheme(color: COLOR_PRIMARY).headlineMedium,
+                  IconButton(
+                    iconSize: 32,
+                    onPressed: () {
+                      //addToFavorite();
+                    },
+                    icon: Icon(Icons.playlist_add),
+                  ),
+                ],
               ),
-              Text(
-                'By: ${widget.song.artist}',
-                style: getTextTheme(color: COLOR_SECONDARY).titleSmall,
-              ),
+
               addVerticalSpace(),
               Column(
                 children: [
@@ -188,11 +230,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       IconButton(
                         iconSize: 32,
                         onPressed: () {
-                          addToFavorite();
+                          setState(() {
+                            SettingUtils.toggleSuffle();
+                          });
                         },
-                        icon: (widget.song.isFavourite)
-                            ? Icon(Icons.favorite, color: Colors.redAccent)
-                            : Icon(Icons.favorite),
+                        icon:
+                            (SettingUtils.suffleType == SettingUtils.SUFFLE_ON)
+                            ? Icon(Icons.shuffle, color: COLOR_PRIMARY)
+                            : Icon(Icons.shuffle),
                       ),
 
                       IconButton(
@@ -213,24 +258,31 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               processingState == ProcessingState.buffering) {
                             return ProgressCircular(
                               color: COLOR_BLACK,
-                              width: 32,
-                              height: 32,
+                              width: 45,
+                              height: 45,
                             );
                           } else if (playing != true) {
                             return IconButton(
                               iconSize: 64,
                               onPressed: () {
-                                widget.audioPlayer.play();
+                                setState(() {
+                                  widget.audioPlayer.play();
+                                });
                               },
-                              icon: Icon(Icons.play_circle_fill),
+                              icon: Icon(
+                                Icons.play_circle_fill,
+                                color: COLOR_PRIMARY,
+                              ),
                             );
                           } else if (processingState ==
                               ProcessingState.completed) {
                             return IconButton(
                               iconSize: 64,
                               onPressed: () async {
-                                await widget.audioPlayer.seek(Duration.zero);
-                                await widget.audioPlayer.play();
+                                setState(() {
+                                  widget.audioPlayer.seek(Duration.zero);
+                                  widget.audioPlayer.play();
+                                });
                               },
                               icon: Icon(
                                 Icons.replay_circle_filled,
@@ -241,7 +293,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             return IconButton(
                               iconSize: 64,
                               onPressed: () {
-                                widget.audioPlayer.pause();
+                                setState(() {
+                                  widget.audioPlayer.pause();
+                                });
                               },
                               icon: Icon(
                                 Icons.pause_circle_filled,
@@ -259,7 +313,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         },
                         icon: (!_fetchingNextSong)
                             ? Icon(Icons.skip_next)
-                            : ProgressCircular(color: COLOR_BLACK),
+                            : ProgressCircular(
+                                color: COLOR_BLACK,
+                                width: 45,
+                                height: 45,
+                              ),
                       ),
 
                       IconButton(
@@ -285,7 +343,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
               Divider(),
               Row(
                 children: [
-                  Text('Related Songs', style: getTextTheme().titleLarge),
+                  Icon(Icons.playlist_add),
+                  Text(
+                    'Playlist (Related Songs)',
+                    style: getTextTheme().titleLarge,
+                  ),
                 ],
               ),
 
@@ -298,6 +360,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       onTap: () {
                         setState(() {
                           widget.song = SongModal.fromJson(relatedSong);
+                          widget.onSongSelected(widget.song);
                         });
                         playSong();
                       },
@@ -314,15 +377,52 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             children: [
                               Text(
                                 relatedSong['title'],
-                                style: getTextTheme().titleMedium,
+                                style: getTextTheme(
+                                  color: (relatedSong['id'] == widget.song.id)
+                                      ? COLOR_PRIMARY
+                                      : COLOR_BLACK,
+                                ).titleMedium,
                               ),
                               //addVerticalSpace(),
                               Text(
                                 relatedSong['artist'],
-                                style: getTextTheme().bodySmall,
+                                style: getTextTheme(
+                                  color: (relatedSong['id'] == widget.song.id)
+                                      ? COLOR_PRIMARY
+                                      : COLOR_BLACK,
+                                ).bodySmall,
                               ),
                             ],
                           ),
+
+                          Spacer(),
+
+                          if (relatedSong['id'] == widget.song.id)
+                            (!widget.audioPlayer.playing)
+                                ? IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.audioPlayer.play();
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.play_arrow,
+                                      color: COLOR_PRIMARY,
+                                      size: 34,
+                                    ),
+                                  )
+                                : IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.audioPlayer.pause();
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.pause,
+                                      color: COLOR_PRIMARY,
+                                      size: 34,
+                                    ),
+                                  ),
                         ],
                       ),
                     );
@@ -346,7 +446,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
     }
   }
 
-
   void addToFavorite() async {
     setState(() {
       if (widget.song.isFavourite) {
@@ -367,7 +466,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   void playNextSong() async {
     // _player.dispose();
-    var body = {"current_song_id": widget.song.id, "userId": await getUserId()};
+    var body = {
+      "current_song_id": widget.song.id,
+      "userId": await getUserId(),
+      "delta": 1,
+    };
 
     setState(() {
       _fetchingNextSong = true;
@@ -379,9 +482,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
     });
 
     if (response.isSuccess) {
-      widget.song = SongModal.fromJson(response.body[0]);
-      setState(() {});
-      
+      setState(() {
+        widget.song = SongModal.fromJson(response.body[0]);
+        widget.onSongSelected(widget.song);
+      });
+
       playSong();
     }
   }

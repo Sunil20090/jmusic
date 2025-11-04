@@ -22,13 +22,11 @@ class SongList extends StatefulWidget {
 }
 
 class _SongListState extends State<SongList> {
-  
   var _songMasterList = [];
 
   bool fetchingSongs = false;
-  bool _fetchingNextSong = false;
 
-  SongModal? _currentSong;
+  late SongModal currentSong = SongModal.dummy();
 
   late AudioPlayer _player;
 
@@ -48,10 +46,9 @@ class _SongListState extends State<SongList> {
   }
 
   playSong() async {
-    setState(() {});
     _player.stop();
     try {
-      _player.setUrl(_currentSong!.song_url);
+      _player.setUrl(currentSong.song_url);
 
       _player.play();
     } catch (e) {
@@ -167,7 +164,9 @@ class _SongListState extends State<SongList> {
                                   children: songList.map((elem) {
                                     return InkWell(
                                       onTap: () {
-                                        _currentSong = SongModal.fromJson(elem);
+                                        setState(() {
+                                        currentSong = SongModal.fromJson(elem);
+                                        });
 
                                         screenRecord(
                                           screen: 'song_list',
@@ -178,7 +177,7 @@ class _SongListState extends State<SongList> {
                                       },
                                       child: SongCard(
                                         title: elem['title'],
-                                        imageUrl: elem['thumbnail']
+                                        imageUrl: elem['thumbnail'],
                                       ),
                                     );
                                   }).toList(),
@@ -192,22 +191,21 @@ class _SongListState extends State<SongList> {
                       ),
                     ),
 
-                    (_currentSong != null)
-                        ? InkWell(
-                            onTap: () {
-                              openPlayerScreen();
-                            },
-                            child: PlayerBottomSheet(
-                              song: _currentSong!,
-                              audioPlayer: _player,
-                              playSongMethod: (song) {
-                                _currentSong = song;
-                                // setState(() {});
-                                playSong();
-                              },
-                            ),
-                          )
-                        : addHorizontalSpace(60),
+                    if (currentSong.id != 0)
+                      InkWell(
+                        onTap: () {
+                          openPlayerScreen();
+                        },
+                        child: PlayerBottomSheet(
+                          song: currentSong,
+                          audioPlayer: _player,
+                          playSongMethod: (song) {
+                            currentSong = song;
+                            // setState(() {});
+                            playSong();
+                          },
+                        ),
+                      ),
                   ],
                 )
               : Row(
@@ -236,7 +234,7 @@ class _SongListState extends State<SongList> {
     );
     if (song != null) {
       setState(() {
-        _currentSong = song;
+        currentSong = song;
         playSong();
       });
     }
@@ -246,11 +244,16 @@ class _SongListState extends State<SongList> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (builder) =>
-            PlayerScreen(song: _currentSong!, audioPlayer: _player),
+        builder: (builder) => PlayerScreen(
+          song: currentSong,
+          audioPlayer: _player,
+          onSongSelected: (song) {
+            setState(() {
+              currentSong = song;
+            });
+          },
+        ),
       ),
     );
-
-    setState(() {});
   }
 }
