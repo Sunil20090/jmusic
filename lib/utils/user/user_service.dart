@@ -25,7 +25,7 @@ _initUserService(obj) async {
 loadUser() async {
   var obj = await loadJson(STORAGE_KEY_USER);
 
-  print('loadUser : $obj');
+  //print('loadUser : $obj');
   if (obj != null) {
     _initUserService(obj);
   }

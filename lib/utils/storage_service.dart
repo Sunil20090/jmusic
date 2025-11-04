@@ -31,8 +31,8 @@ Future deleteJson(String key) async {
 
   if (prefs.containsKey(key)) {
     await prefs.remove(key);
-    print('$key deleted');
+    //print('$key deleted');
   } else {
-    print('$key does not exist');
+    //print('$key does not exist');
   }
 }

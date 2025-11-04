@@ -22,12 +22,13 @@ class SongList extends StatefulWidget {
 }
 
 class _SongListState extends State<SongList> {
+  
   var _songMasterList = [];
 
   bool fetchingSongs = false;
   bool _fetchingNextSong = false;
 
-  late SongModal _currentSong;
+  SongModal? _currentSong;
 
   late AudioPlayer _player;
 
@@ -50,7 +51,7 @@ class _SongListState extends State<SongList> {
     setState(() {});
     _player.stop();
     try {
-      _player.setUrl(_currentSong.song_url);
+      _player.setUrl(_currentSong!.song_url);
 
       _player.play();
     } catch (e) {
