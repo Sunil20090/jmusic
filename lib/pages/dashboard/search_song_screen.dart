@@ -43,53 +43,55 @@ class _SearchSongScreenState extends State<SearchSongScreen> {
             style: getTextTheme(color: COLOR_PRIMARY).headlineLarge,
           ),
         ),
-        body: Container(
-          padding: SCREEN_PADDING,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: FloatingLabelEditBox(
-                  labelText: "Search...",
-                  controller: _searchController,
-                ),
-              ),
-
-              ..._filteredItems.map((song) {
-                return ListTile(
-                  onTap: () {
-                    final choosen_song = SongModal.fromJson(song);
-                    screenRecord(screen: 'search', event_name: 'song_clicked');
-                    Navigator.pop(context, choosen_song);
-                  },
-                  title: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      RoundedRectImage(
-                        thumbnail_url: song['thumbnail'],
-                        width: 40,
-                        height: 40,
-                      ),
-                      addHorizontalSpace(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${song['title']}',
-                            style: getTextTheme().titleMedium,
-                          ),
-                          Text(
-                            '${song['artist']}',
-                            style: getTextTheme().bodySmall,
-                          ),
-                        ],
-                      ),
-                    ],
+        body: SingleChildScrollView(
+          child: Container(
+            padding: SCREEN_PADDING,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: FloatingLabelEditBox(
+                    labelText: "Search...",
+                    controller: _searchController,
                   ),
-                );
-              }).toList(),
-            ],
+                ),
+          
+                ..._filteredItems.map((song) {
+                  return ListTile(
+                    onTap: () {
+                      final choosen_song = SongModal.fromJson(song);
+                      screenRecord(screen: 'search', event_name: 'song_clicked');
+                      Navigator.pop(context, choosen_song);
+                    },
+                    title: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        RoundedRectImage(
+                          thumbnail_url: song['thumbnail'],
+                          width: 40,
+                          height: 40,
+                        ),
+                        addHorizontalSpace(),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${song['title']}',
+                              style: getTextTheme().titleMedium,
+                            ),
+                            Text(
+                              '${song['artist']}',
+                              style: getTextTheme().bodySmall,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
           ),
         ),
       ),

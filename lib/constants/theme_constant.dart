@@ -24,6 +24,7 @@ const COLOR_BASE_ERROR = Color.fromARGB(255, 136, 0, 0);
 const COLOR_RED = Color.fromARGB(255, 245, 109, 109);
 
 const COLOR_TRANSLUSCENT_BLACK = Color.fromARGB(118, 0, 0, 0);
+const COLOR_TRANSLUSCENT_WHITE = Color.fromARGB(118, 255, 255, 255);
 
 const EdgeInsets CONTENT_PADDING = EdgeInsets.all(8);
 
@@ -31,6 +32,7 @@ const EdgeInsets SCREEN_PADDING =
     EdgeInsets.symmetric(horizontal: 12, vertical: 18);
 
 const double CONTENT_PADDING_VALUE = 8;
+
 
 getTransitionBuilder() {
   return (context, animation, secondaryAnimation, child) {

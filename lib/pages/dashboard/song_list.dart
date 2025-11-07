@@ -35,7 +35,7 @@ class _SongListState extends State<SongList> {
     super.initState();
 
     _initPlayer();
-    initSongList();
+    _initSongList();
   }
 
   _initPlayer() async {
@@ -62,7 +62,7 @@ class _SongListState extends State<SongList> {
     _player.dispose();
   }
 
-  void initSongList() async {
+  void _initSongList() async {
     setState(() {
       fetchingSongs = true;
     });
@@ -165,7 +165,9 @@ class _SongListState extends State<SongList> {
                                     return InkWell(
                                       onTap: () {
                                         setState(() {
-                                        currentSong = SongModal.fromJson(elem);
+                                          currentSong = SongModal.fromJson(
+                                            elem,
+                                          );
                                         });
 
                                         screenRecord(
@@ -220,11 +222,13 @@ class _SongListState extends State<SongList> {
     );
   }
 
-  void openUploadSongScreen() {
-    Navigator.push(
+  void openUploadSongScreen() async {
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (builder) => UploadSongScreen()),
     );
+
+    _initSongList();
   }
 
   void openSearhSongScreen() async {

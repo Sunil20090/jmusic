@@ -132,9 +132,7 @@ CREATE TABLE jmusic_users(
 CREATE TABLE jmusic_albums(
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
-    song_id int,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (song_id) references jmusic_songs(id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -142,6 +140,16 @@ CREATE TABLE jmusic_songs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     artist VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE jmusic_albums_of_songs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    song_id int,
+    album_id int,
+    FOREIGN KEY (song_id) references jmusic_songs(id),
+    FOREIGN KEY (album_id) references jmusic_albums(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

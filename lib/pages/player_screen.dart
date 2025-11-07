@@ -1,6 +1,11 @@
+import 'dart:math';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:jmusic/components/generic/round_rect.dart';
 import 'package:jmusic/components/progress_circular.dart';
 import 'package:jmusic/components/rounded_rect_image.dart';
+import 'package:jmusic/constants/image_constant.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/constants/url_constant.dart';
 import 'package:jmusic/modals/song_modal.dart';
@@ -30,11 +35,11 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> {
   var _relatedSongs = [];
 
-  bool _fetchingNextSong = false;
-
   @override
   void initState() {
     super.initState();
+
+    print('is favi  ${widget.song.isFavourite}');
     _initRelatedMusicList();
 
     screenRecord(
@@ -49,14 +54,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
           return;
         }
 
-        if (SettingUtils.suffleType == SettingUtils.SUFFLE_OFF) {
-          if (SettingUtils.repeatType == SettingUtils.REPEAT_ALL) {
-            playNextSong();
-          }
-        } else if (SettingUtils.suffleType == SettingUtils.SUFFLE_ON){
-          if (SettingUtils.repeatType == SettingUtils.REPEAT_ALL) {
-            playNextSong();
-          }
+        if (SettingUtils.repeatType == SettingUtils.REPEAT_ALL) {
+          playNextSong();
+          return;
         }
       }
     });
@@ -72,8 +72,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
     ApiResponse response = await postService(URL_RELATED_SONGS, body);
 
     if (response.isSuccess) {
-      _relatedSongs = response.body;
-      setState(() {});
+      setState(() {
+        _relatedSongs = response.body;
+      });
     }
   }
 
@@ -86,29 +87,68 @@ class _PlayerScreenState extends State<PlayerScreen> {
           padding: SCREEN_PADDING,
           child: Column(
             children: [
-              addVerticalSpace(DEFAULT_LARGE_SPACE),
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Card(
-                  elevation: 4,
-                  child: RoundedRectImage(
-                    width: 200,
-                    height: 200,
-                    thumbnail_url: widget.song.thumbnail,
+              addVerticalSpace(),
+              Row(
+                children: [
+                  RoundRect(
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.arrow_back_ios_new),
+                    ),
                   ),
-                ),
+                ],
+              ),
+              Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    top: 0,
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                      child: FadeInImage(
+                        placeholder: Image.asset(
+                          PLACEHOLDER_IMAGE_MUSIC,
+                          fit: BoxFit.fill,
+                        ).image,
+                        image: Image.network(
+                          widget.song.thumbnail!,
+                          fit: BoxFit.fill,
+                        ).image,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Card(
+                      elevation: 8,
+                      child:
+                          //Container()
+                          RoundedRectImage(
+                            width: 200,
+                            height: 200,
+
+                            thumbnail_url: widget.song.thumbnail,
+                          ),
+                    ),
+                  ),
+                ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IconButton(
-                    iconSize: 32,
-                    onPressed: () {
-                      addToFavorite();
-                    },
-                    icon: (widget.song.isFavourite)
-                        ? Icon(Icons.favorite, color: Colors.redAccent)
-                        : Icon(Icons.favorite),
+                  RoundRect(
+                    child: IconButton(
+                      iconSize: 32,
+                      onPressed: () {
+                        addToFavorite();
+                      },
+                      icon: (widget.song.isFavourite)
+                          ? Icon(Icons.favorite, color: Colors.redAccent)
+                          : Icon(Icons.favorite),
+                    ),
                   ),
                   Spacer(),
                   Column(
@@ -128,12 +168,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   ),
                   Spacer(),
 
-                  IconButton(
-                    iconSize: 32,
-                    onPressed: () {
-                      //addToFavorite();
-                    },
-                    icon: Icon(Icons.playlist_add),
+                  RoundRect(
+                    child: IconButton(
+                      iconSize: 32,
+                      onPressed: () {
+                        //addToFavorite();
+                      },
+                      icon: Icon(Icons.playlist_add),
+                    ),
                   ),
                 ],
               ),
@@ -242,7 +284,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
                       IconButton(
                         iconSize: 48,
-                        onPressed: () {},
+                        onPressed: () {
+                          playNextSong(delta: -1);
+                        },
                         icon: Icon(Icons.skip_previous),
                       ),
                       addHorizontalSpace(),
@@ -311,13 +355,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         onPressed: () {
                           playNextSong();
                         },
-                        icon: (!_fetchingNextSong)
-                            ? Icon(Icons.skip_next)
-                            : ProgressCircular(
-                                color: COLOR_BLACK,
-                                width: 45,
-                                height: 45,
-                              ),
+                        icon: Icon(Icons.skip_next),
                       ),
 
                       IconButton(
@@ -344,6 +382,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
               Row(
                 children: [
                   Icon(Icons.playlist_add),
+                  addHorizontalSpace(),
                   Text(
                     'Playlist (Related Songs)',
                     style: getTextTheme().titleLarge,
@@ -358,18 +397,36 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     final relatedSong = _relatedSongs[index];
                     return ListTile(
                       onTap: () {
-                        setState(() {
-                          widget.song = SongModal.fromJson(relatedSong);
-                          widget.onSongSelected(widget.song);
-                        });
-                        playSong();
+                        if (widget.song.id != relatedSong['id']) {
+                          setState(() {
+                            widget.song = SongModal.fromJson(relatedSong);
+                            widget.onSongSelected(widget.song);
+                          });
+                          playSong();
+                        }
                       },
                       title: Row(
                         children: [
-                          RoundedRectImage(
-                            width: 40,
-                            height: 40,
-                            thumbnail_url: relatedSong['thumbnail'],
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              RoundedRectImage(
+                                width: 40,
+                                height: 40,
+                                thumbnail_url: relatedSong['thumbnail'],
+                              ),
+
+                              if (relatedSong['isFavourite'] == 1)
+                                Positioned(
+                                  left: -4,
+                                  bottom: -4,
+                                  child: Icon(
+                                    Icons.favorite,
+                                    color: Colors.redAccent,
+                                    size: 16,
+                                  ),
+                                ),
+                            ],
                           ),
                           addHorizontalSpace(),
                           Column(
@@ -448,11 +505,16 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   void addToFavorite() async {
     setState(() {
+      final searchedSong = _relatedSongs.firstWhere(
+        (song) => song['id'] == widget.song.id,
+      );
+
       if (widget.song.isFavourite) {
         widget.song.isFavourite = false;
       } else {
         widget.song.isFavourite = true;
       }
+      searchedSong['isFavourite'] = widget.song.isFavourite ? 1 : 0;
     });
 
     var body = {"userId": await getUserId(), "songId": widget.song.id};
@@ -464,30 +526,25 @@ class _PlayerScreenState extends State<PlayerScreen> {
     }
   }
 
-  void playNextSong() async {
-    // _player.dispose();
-    var body = {
-      "current_song_id": widget.song.id,
-      "userId": await getUserId(),
-      "delta": 1,
-    };
+  void playNextSong({int delta = 1}) async {
+    final random = Random();
+    var nextSong;
 
-    setState(() {
-      _fetchingNextSong = true;
-    });
-    ApiResponse response = await postService(URL_NEXT_SONG, body);
+    if (SettingUtils.suffleType == SettingUtils.SUFFLE_ON) {
+      nextSong = _relatedSongs[random.nextInt(_relatedSongs.length)];
+    } else if (SettingUtils.suffleType == SettingUtils.SUFFLE_OFF) {
+      int index = _relatedSongs.indexWhere((el) => el['id'] == widget.song.id);
 
-    setState(() {
-      _fetchingNextSong = false;
-    });
-
-    if (response.isSuccess) {
-      setState(() {
-        widget.song = SongModal.fromJson(response.body[0]);
-        widget.onSongSelected(widget.song);
-      });
-
-      playSong();
+      int nextIndex = (index + delta) % _relatedSongs.length;
+      nextSong = _relatedSongs[nextIndex];
+      print('next index $nextIndex');
     }
+
+    setState(() {
+      widget.song = SongModal.fromJson(nextSong);
+      widget.onSongSelected(widget.song);
+    });
+
+    playSong();
   }
 }

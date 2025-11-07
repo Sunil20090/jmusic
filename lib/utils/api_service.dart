@@ -43,6 +43,10 @@ Future<ApiResponse> getService(String url) async {
   var reponseBody = response.statusCode == 200
       ? jsonDecode(response.body)
       : response.body;
+    print(
+      'URL: $url \n   \n Response Body:\n \t$reponseBody',
+    );
+  
   return ApiResponse(
     body: reponseBody,
     isSuccess: response.statusCode == 200,

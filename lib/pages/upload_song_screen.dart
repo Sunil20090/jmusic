@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jmusic/components/colored_button.dart';
 import 'package:jmusic/components/floating_label_edit_box.dart';
+import 'package:jmusic/components/generic/selector_screen.dart';
 import 'package:jmusic/components/progress_circular.dart';
 import 'package:jmusic/components/round_it.dart';
 import 'package:jmusic/constants/theme_constant.dart';
 import 'package:jmusic/constants/url_constant.dart';
+import 'package:jmusic/modals/pair_modal.dart';
 import 'package:jmusic/utils/api_service.dart';
 import 'package:jmusic/utils/common_function.dart';
 
@@ -23,6 +25,8 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
   File? _musicFile, _imageFile;
   bool _uploadingFile = false;
 
+  var _albumList = [];
+
   TextEditingController _nameCotroller = TextEditingController();
   TextEditingController _artistCotroller = TextEditingController();
   TextEditingController _albumController = TextEditingController();
@@ -36,100 +40,147 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    _initAlbumList();
+  }
+
+  _initAlbumList() async {
+    ApiResponse response = await getService(URL_GET_ALBUM_LIST);
+
+    if (response.isSuccess) {
+      setState(() {
+        _albumList = response.body;
+      });
+      print(response.body);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        padding: SCREEN_PADDING,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            addVerticalSpace(DEFAULT_LARGE_SPACE * 3),
-            FloatingLabelEditBox(
-              labelText: 'Name',
-              controller: _nameCotroller,
-            ),
-            addVerticalSpace(),
-            FloatingLabelEditBox(
-              labelText: 'Artist names',
-              controller: _artistCotroller,
-            ),
-            addVerticalSpace(),
-            FloatingLabelEditBox(
-              labelText: 'Album',
-              controller: _albumController,
-            ),
-            addVerticalSpace(),
-            Divider(),
-            RoundIt(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ColoredButton(
-                    onPressed: () {
-                      chooseMusicFile();
-                    },
-                    child: Text(
-                      'Choose Music File',
-                      style: getTextTheme(color: COLOR_WHITE).titleMedium,
-                    ),
-                  ),
-                  if (_musicFile != null)
-                    Row(
-                      children: [
-                        addHorizontalSpace(),
-                        Text('Attached', style: getTextTheme().titleSmall),
-                        Icon(Icons.check),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-            Divider(),
-            addVerticalSpace(),
-            Row(
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(
+          foregroundColor: COLOR_PRIMARY,
+          title: Text(
+            'Upload Songs',
+            style: getTextTheme(color: COLOR_PRIMARY).headlineLarge,
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            padding: SCREEN_PADDING,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                FloatingLabelEditBox(
+                  labelText: 'Name',
+                  controller: _nameCotroller,
+                ),
+                addVerticalSpace(),
+                FloatingLabelEditBox(
+                  labelText: 'Artist names',
+                  controller: _artistCotroller,
+                ),
+                addVerticalSpace(),
+                FloatingLabelEditBox(
+                  labelText: 'Album',
+                  controller: _albumController,
+                ),
+
+                addVerticalSpace(),
+
                 RoundIt(
                   child: ColoredButton(
                     onPressed: () {
-                      chooseImageFile();
+                      openChooseScreen();
                     },
                     child: Text(
-                      'Choose Image File',
+                      'Choose Existing Album',
                       style: getTextTheme(color: COLOR_WHITE).titleMedium,
                     ),
                   ),
                 ),
-                if (_imageFile != null)
-                  RoundIt(
-                    child: SizedBox(
-                      width: 100,
-                      height: 100,
-                      child: Image.file(_imageFile!),
-                    ),
-                  ),
-              ],
-            ),
-    
-            addVerticalSpace(DEFAULT_LARGE_SPACE),
-            ColoredButton(
-              onPressed: !(_uploadingFile)
-                  ? () {
-                      uploadSong();
-                    }
-                  : null,
-              child: (!_uploadingFile)
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Upload Song!',
+
+                addVerticalSpace(),
+
+                Divider(),
+                RoundIt(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      ColoredButton(
+                        onPressed: () {
+                          chooseMusicFile();
+                        },
+                        child: Text(
+                          'Choose Music File',
                           style: getTextTheme(color: COLOR_WHITE).titleMedium,
                         ),
-                      ],
-                    )
-                  : ProgressCircular(),
+                      ),
+                      if (_musicFile != null)
+                        Row(
+                          children: [
+                            addHorizontalSpace(),
+                            Text('Attached', style: getTextTheme().titleSmall),
+                            Icon(Icons.check),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+                Divider(),
+                addVerticalSpace(),
+                Row(
+                  children: [
+                    RoundIt(
+                      child: ColoredButton(
+                        onPressed: () {
+                          chooseImageFile();
+                        },
+                        child: Text(
+                          'Choose Image File',
+                          style: getTextTheme(color: COLOR_WHITE).titleMedium,
+                        ),
+                      ),
+                    ),
+                    if (_imageFile != null)
+                      RoundIt(
+                        child: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: Image.file(_imageFile!),
+                        ),
+                      ),
+                  ],
+                ),
+
+                addVerticalSpace(DEFAULT_LARGE_SPACE),
+                ColoredButton(
+                  onPressed: !(_uploadingFile)
+                      ? () {
+                          uploadSong();
+                        }
+                      : null,
+                  child: (!_uploadingFile)
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Upload Song!',
+                              style: getTextTheme(
+                                color: COLOR_WHITE,
+                              ).titleMedium,
+                            ),
+                          ],
+                        )
+                      : ProgressCircular(),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -146,7 +197,11 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
       allowedExtensions: ['mp3', 'wav', 'm4a'],
     );
 
+    
+
     if (result != null) {
+      _nameCotroller.text = result.files.first.name;
+      
       _musicFile = File(result.files.single.path!);
       setState(() {});
     }
@@ -174,9 +229,9 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
     }
 
     var body = {
-      "name": _nameCotroller.text,
-      "artist": _artistCotroller.text,
-      "album": _albumController.text,
+      "name": _nameCotroller.text.trim(),
+      "artist": _artistCotroller.text.trim(),
+      "album": _albumController.text.trim(),
       "base64": base64,
       "imageBase64": imageBase64,
     };
@@ -201,6 +256,22 @@ class _UploadSongScreenState extends State<UploadSongScreen> {
           Navigator.pop(context);
         },
       );
+    }
+  }
+
+  void openChooseScreen() async {
+    var result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (builder) =>
+            SelectorScreen(title: 'Albums', list: _albumList.cast<String>()),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _albumController.text = result;
+      });
     }
   }
 }
